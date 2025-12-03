@@ -13,7 +13,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['owner', 'admin', 'kepala_toko']);
+            $table->enum('role', ['owner', 'manajer_operasional', 'kepala_toko']);
             $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->timestamps();
         });

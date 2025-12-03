@@ -21,11 +21,14 @@ use App\Http\Controllers\{
     BranchStockController,
     AccessoryController,
     StockReportController,
-    CustomerController
+    CustomerController,
+    ManagerProductController,
+    CatalogController
 };
 
 // === AUTH ROUTES ===
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/product/{inventoryItem}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
@@ -35,7 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
 
     //shared route
-    Route::middleware(['auth', 'role:admin,kepala_toko'])->group(function () {
+    Route::middleware(['auth', 'role:manajer_operasional,kepala_toko'])->group(function () {
         Route::post('/purchases/{purchase}/save-imei', [PurchaseController::class, 'saveImei'])->name('purchases.save_imei');
         Route::resource('purchases', PurchaseController::class);
         Route::resource('purchase-items', PurchaseItemController::class);
@@ -49,7 +52,7 @@ Route::middleware('auth')->group(function () {
         ->name('report.stock-summary');
     });
 
-    Route::middleware(['auth', 'role:owner,kepala_toko,admin'])->group(function () {
+    Route::middleware(['auth', 'role:owner,kepala_toko,manajer_operasional'])->group(function () {
         Route::get('/stok-cabang', [BranchStockController::class, 'index'])->name('stok-cabang');
     });
     // === OWNER ===
@@ -68,8 +71,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/owner/purchases/{purchase}/pelunasan', [PurchaseController::class, 'pelunasan'])->name('owner.purchases.pelunasan');
     });
 
-    // === ADMIN ===
-    Route::middleware('role:admin')->group(function () {
+    // === manajer_operasional ===
+    Route::middleware('role:manajer_operasional')->group(function () {
         Route::Resource('products', ProductController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::get('/stocks/imei/{product}', [StockController::class, 'showImei'])->name('stocks.imei');
@@ -78,8 +81,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('accessories', AccessoryController::class);
         Route::resource('stocks', StockController::class);
         Route::resource('customers', CustomerController::class);
-        Route::get('/admin/inventory/edit-price', [InventoryItemController::class, 'editPrice'])->name('inventory.editPrice');
-        Route::post('/admin/inventory/update-price', [InventoryItemController::class, 'updatePrice'])->name('inventory.updatePrice');
+        Route::get('/manajer_operasional/inventory/edit-price', [InventoryItemController::class, 'editPrice'])->name('inventory.editPrice');
+        Route::post('/manajer_operasional/inventory/update-price', [InventoryItemController::class, 'updatePrice'])->name('inventory.updatePrice');
+        Route::get('/inventory/for-ecom', [ManagerProductController::class, 'index'])->name('inventory.for_ecom');
+        Route::get('/inventory/{inventoryItem}/edit-price', [ManagerProductController::class, 'editPrice'])->name('inventory.edit_price');
+        Route::post('/inventory/{inventoryItem}/update-price', [ManagerProductController::class, 'updatePrice'])->name('inventory.update_price');
+        Route::post('/inventory/{inventoryItem}/post', [ManagerProductController::class, 'postToCatalog'])->name('inventory.post');
+        Route::post('/inventory/{inventoryItem}/unpost', [ManagerProductController::class, 'unpostFromCatalog'])->name('inventory.unpost');
     });
 
     // === KEPALA TOKO ===

@@ -9,7 +9,7 @@ class InventoryItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'product_id', 'imei', 'purchase_item_id', 'status','purchase_price','inventory_id'];
+    protected $fillable = ['branch_id', 'product_id', 'imei', 'purchase_item_id', 'status','purchase_price','inventory_id','ecom_price', 'is_listed', 'listed_at',];
 
     public function branch() {
         return $this->belongsTo(Branch::class);
@@ -35,5 +35,13 @@ class InventoryItem extends Model
     public function transferItems()
     {
         return $this->hasMany(StockTransferItem::class, 'inventory_item_id');
+    }
+    public function scopeInStock($query)
+    {
+        return $query->where('status', 'in_stock');
+    }
+    public function scopeListed($query)
+    {
+        return $query->where('is_listed', true);
     }
 }

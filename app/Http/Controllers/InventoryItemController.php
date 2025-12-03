@@ -13,7 +13,7 @@ class InventoryItemController extends Controller
     public function index()
     {
         $branches = Branch::all();
-        return view('admin.inventory.index', compact('branches'));
+        return view('manajer_operasional.inventory.index', compact('branches'));
     }
 
     // Menampilkan stok untuk cabang tertentu
@@ -24,12 +24,12 @@ class InventoryItemController extends Controller
             ->where('branch_id', $branchId)
             ->get();
 
-        return view('admin.inventory.show', compact('branch', 'inventory'));
+        return view('manajer_operasional.inventory.show', compact('branch', 'inventory'));
     }
     public function editPrice()
     {
         $products = \App\Models\Product::orderBy('name')->get();
-        return view('admin.inventory.edit_price', compact('products'));
+        return view('manajer_operasional.inventory.edit_price', compact('products'));
     }
     
     public function updatePrice(Request $request)

@@ -19,7 +19,7 @@ class ProductController extends Controller
         $products = $query->get();
         $brands = \App\Models\Brand::all();
         $types = \App\Models\Type::all();
-        return view('admin.products.index', compact('products','brands', 'types'));
+        return view('manajer_operasional.products.index', compact('products','brands', 'types'));
     }
     public function store(Request $request)
     {
@@ -75,7 +75,7 @@ class ProductController extends Controller
             $query->where('status', 'in_stock');
         }], 'cost_price')
         ->paginate(20);
-        return view('admin.sales.update_modal', compact('products'));
+        return view('manajer_operasional.sales.update_modal', compact('products'));
     }
 
     public function updateModal(Request $request, $id)

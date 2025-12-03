@@ -10,7 +10,7 @@ class TypeController extends Controller
     public function index()
     {
         $types = Type::all();
-        return view('admin.types.index', compact('types'));
+        return view('manajer_operasional.types.index', compact('types'));
     }
     public function store(Request $request)
     {

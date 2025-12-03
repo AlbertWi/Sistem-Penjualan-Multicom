@@ -1,7 +1,6 @@
-{{-- resources/views/dashboard/admin.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Dashboard Manajer')
 
 @section('content')
 <div class="row">

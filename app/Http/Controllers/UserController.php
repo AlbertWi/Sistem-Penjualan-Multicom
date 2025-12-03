@@ -27,7 +27,7 @@ class UserController extends Controller
             'name'      => 'required|string|max:255',
             'email'     => 'required|string|email|max:255|unique:users',
             'password'  => 'required|string|min:6|confirmed',
-            'role'      => 'required|in:admin,kepala_toko',
+            'role'      => 'required|in:manajer_operasional,kepala_toko',
             'branch_id' => 'required|exists:branches,id',
         ],[
             'name.required' => 'Nama harus diisi.',

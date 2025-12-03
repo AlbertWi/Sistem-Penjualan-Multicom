@@ -10,7 +10,7 @@ class BrandController extends Controller
     public function index()
     {
         $brands = Brand::all();
-        return view('admin.brands.index', compact('brands'));
+        return view('manajer_operasional.brands.index', compact('brands'));
     }
 
     public function store(Request $request)

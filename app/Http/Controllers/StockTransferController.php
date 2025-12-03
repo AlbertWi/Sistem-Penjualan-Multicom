@@ -40,7 +40,7 @@ class StockTransferController extends Controller
         ->get();
         $products = Product::all();
 
-        return view('admin.stock_transfers.create', compact('branches', 'products', 'userBranchId','availableStocks'));
+        return view('manajer_operasional.stock_transfers.create', compact('branches', 'products', 'userBranchId','availableStocks'));
     }
 
 
@@ -146,7 +146,7 @@ class StockTransferController extends Controller
                         ->findOrFail($id);
     
         $view = match (auth()->user()->role) {
-            'admin' => 'admin.stock_transfers.show',
+            'manajer_operasional' => 'manajer_operasional.stock_transfers.show',
             'kepala_toko' => 'kepala_toko.stock_transfers.show',
             default => abort(403, 'Unauthorized'),
         };

@@ -17,7 +17,7 @@ class StockController extends Controller
         ->with('product') // pastikan relasi ke Product
         ->get();
 
-    return view('admin.stocks.index', compact('stocks'));
+    return view('manajer_operasional.stocks.index', compact('stocks'));
     }
     public function showImei($productId)
     {
@@ -27,6 +27,6 @@ class StockController extends Controller
 
         $product = \App\Models\Product::findOrFail($productId);
 
-    return view('admin.stocks.imei', compact('inventoryItems', 'product'));
+    return view('manajer_operasional.stocks.imei', compact('inventoryItems', 'product'));
     }
 }

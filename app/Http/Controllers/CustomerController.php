@@ -11,12 +11,12 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = Customer::latest()->paginate(10);
-        return view('admin.customers.index', compact('customers'));
+        return view('manajer_operasional.customers.index', compact('customers'));
     }
 
     public function create()
     {
-        return view('admin.customers.create');
+        return view('manajer_operasional.customers.create');
     }
 
     public function store(Request $request)
@@ -34,7 +34,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
-        return view('admin.customers.edit', compact('customer'));
+        return view('manajer_operasional.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, Customer $customer)

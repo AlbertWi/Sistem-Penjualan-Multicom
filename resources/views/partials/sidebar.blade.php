@@ -21,7 +21,7 @@
             </a>
           </li>
 
-          @if(Auth::check() && Auth::user()->role === 'admin')
+          @if(Auth::check() && Auth::user()->role === 'manajer_operasional')
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-boxes"></i>

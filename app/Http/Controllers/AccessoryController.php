@@ -11,12 +11,12 @@ class AccessoryController extends Controller
     public function index()
     {
         $accessories = Accessory::latest()->paginate(10);
-        return view('admin.accessories.index', compact('accessories'));
+        return view('manajer_operasional.accessories.index', compact('accessories'));
     }
 
     public function create()
     {
-        return view('admin.accessories.create');
+        return view('manajer_operasional.accessories.create');
     }
 
     public function store(Request $request)
@@ -32,7 +32,7 @@ class AccessoryController extends Controller
 
     public function edit(Accessory $accessory)
     {
-        return view('admin.accessories.edit', compact('accessory'));
+        return view('manajer_operasional.accessories.edit', compact('accessory'));
     }
 
     public function update(Request $request, Accessory $accessory)

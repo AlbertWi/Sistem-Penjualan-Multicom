@@ -50,8 +50,8 @@ public function dashboard()
 {
     $user = Auth::user();
     switch ($user->role) {
-        case 'admin':
-            return view('dashboard.admin', [
+        case 'manajer_operasional':
+            return view('dashboard.manajer_operasional', [
                 'totalProducts' => \App\Models\Product::count(),
                 'totalSuppliers' => \App\Models\Supplier::count(),
                 'totalPurchases' => \App\Models\Purchase::count(),
@@ -107,7 +107,7 @@ public function dashboard()
                 return view('dashboard.owner', [
                     'totalStock' => \App\Models\InventoryItem::where('status', 'in_stock')->count(),
                     'totalBranches' => \App\Models\Branch::count(),
-                    'totalAdmins' => \App\Models\User::whereIn('role', ['admin', 'kepala_toko'])->count(),
+                    'totalAdmins' => \App\Models\User::whereIn('role', ['manajer_operasional', 'kepala_toko'])->count(),
                     'totalStockRequests' => \App\Models\StockRequest::count(),
                     'pendingStockRequests' => \App\Models\StockRequest::where('status', 'pending')->count(),
                     'lowStocks' => $lowStocks,
