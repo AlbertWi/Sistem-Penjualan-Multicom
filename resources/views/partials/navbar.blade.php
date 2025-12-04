@@ -1,3 +1,4 @@
+@auth
 <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom">
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -6,8 +7,9 @@
             </a>
         </li>
     </ul>
+
     <ul class="navbar-nav ml-auto">
-    <li class="nav-item dropdown">
+        <li class="nav-item dropdown">
             <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button">
                 <i class="fas fa-user-circle me-1"></i> {{ Auth::user()->name }}
             </a>
@@ -24,3 +26,4 @@
         </li>
     </ul>
 </nav>
+@endauth

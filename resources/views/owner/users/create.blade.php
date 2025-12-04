@@ -38,7 +38,7 @@
                 <div class="form-group">
                     <label>Role</label>
                     <select name="role" class="form-control">
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="manajer_operasional" {{ old('manajer_operasional') == 'manajer_operasional' ? 'selected' : '' }}>manajer_operasional</option>
                         <option value="kepala_toko" {{ old('role') == 'kepala_toko' ? 'selected' : '' }}>Kepala Toko</option>
                     </select>
                 </div>
