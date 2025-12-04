@@ -26,7 +26,6 @@ use App\Http\Controllers\{
     CatalogController
 };
 
-// === AUTH ROUTES ===
 Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/product/{inventoryItem}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -51,13 +50,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/report/stock-summary', [App\Http\Controllers\StockReportController::class, 'rekap'])
         ->name('report.stock-summary');
     });
-
     Route::middleware(['auth', 'role:owner,kepala_toko,manajer_operasional'])->group(function () {
         Route::get('/stok-cabang', [BranchStockController::class, 'index'])->name('stok-cabang');
     });
     // === OWNER ===
     Route::middleware('role:owner')->group(function () {
-        Route::resource('inventory', InventoryItemController::class);
         Route::resource('branches', BranchController::class);
         Route::resource('users', UserController::class);
         Route::get('/laporan-penjualan', [SaleController::class, 'laporanPenjualan'])->name('owner.laporan.penjualan');
@@ -89,7 +86,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/{inventoryItem}/post', [ManagerProductController::class, 'postToCatalog'])->name('inventory.post');
         Route::post('/inventory/{inventoryItem}/unpost', [ManagerProductController::class, 'unpostFromCatalog'])->name('inventory.unpost');
     });
-
+        Route::middleware(['auth', 'role:manajer_operasional,owner'])->group(function () {
+            Route::resource('inventory', InventoryItemController::class);
+    });
     // === KEPALA TOKO ===
     Route::middleware('role:kepala_toko')->group(function () {
         Route::resource('product', ProductController::class);

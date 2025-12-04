@@ -17,7 +17,7 @@
   <td>{{ $item->product->brand->name ?? '' }} {{ $item->product->name ?? '' }}</td>
   <td>{{ number_format($item->buy_price,0,',','.') }}</td>
   <td>
-    <form action="{{ route('manager.inventory.update_price', $item) }}" method="POST" style="display:inline">
+    <form action="{{ route('inventory.update_price', $item) }}" method="POST" style="display:inline">
       @csrf
       <input name="ecom_price" value="{{ old('ecom_price', $item->ecom_price) }}" style="width:120px">
       <button class="btn btn-sm btn-primary">Simpan</button>
@@ -26,12 +26,12 @@
   <td>{{ $item->is_listed ? 'Ya' : 'Tidak' }}</td>
   <td>
     @if(!$item->is_listed)
-      <form action="{{ route('manager.inventory.post', $item) }}" method="POST" style="display:inline">
+      <form action="{{ route('inventory.post', $item) }}" method="POST" style="display:inline">
         @csrf
         <button class="btn btn-sm btn-success">Post ke Katalog</button>
       </form>
     @else
-      <form action="{{ route('manager.inventory.unpost', $item) }}" method="POST" style="display:inline">
+      <form action="{{ route('inventory.unpost', $item) }}" method="POST" style="display:inline">
         @csrf
         <button class="btn btn-sm btn-warning">Unpost</button>
       </form>

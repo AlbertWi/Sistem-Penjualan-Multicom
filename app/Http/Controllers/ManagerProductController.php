@@ -14,13 +14,13 @@ class ManagerProductController extends Controller
                     ->orderBy('created_at','desc')
                     ->paginate(30);
 
-        return view('manager.inventory.for_ecom', compact('items'));
+        return view('manajer_operasional.inventory.for_ecom', compact('items'));
     }
 
     public function editPrice(InventoryItem $inventoryItem)
     {
         $this->authorize('update', $inventoryItem); // optional policy
-        return view('manager.inventory.edit_price', compact('inventoryItem'));
+        return view('manajer_operasional.inventory.edit_price', compact('inventoryItem'));
     }
 
     public function updatePrice(Request $request, InventoryItem $inventoryItem)
@@ -33,7 +33,7 @@ class ManagerProductController extends Controller
             'ecom_price' => $request->ecom_price
         ]);
 
-        return redirect()->route('manager.inventory.for_ecom')->with('success','Harga tersimpan.');
+        return redirect()->route('inventory.for_ecom')->with('success','Harga tersimpan.');
     }
 
     public function postToCatalog(InventoryItem $inventoryItem)
