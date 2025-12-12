@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('accessories', function (Blueprint $table) {
             $table->id();
             $table->string('name');            // nama aksesoris
-            $table->decimal('price', 15, 2);   // harga aksesoris
             $table->timestamps();
         });
     }

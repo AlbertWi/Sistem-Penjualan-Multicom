@@ -16,11 +16,11 @@
             <form action="{{ route('inventory.updatePrice') }}" method="POST">
                 @csrf
                 <div class="form-group mb-3">
-                    <label for="product_id">Pilih Produk</label>
-                    <select class="form-control select2" name="product_id" id="product_id" required>
+                    <label for="type_id">Pilih Produk</label>
+                    <select class="form-control select2" name="type_id" id="type_id" required>
                         <option value="">-- Cari & Pilih Produk --</option>
-                        @foreach($products as $product)
-                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                        @foreach($types as $type)
+                            <option value="{{ $type->id }}">{{ $type->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -42,7 +42,7 @@
     // Inisialisasi select2 jika dipakai
     $(document).ready(function() {
         if ($.fn.select2) {
-            $('#product_id').select2({
+            $('#type_id').select2({
                 placeholder: 'Cari produk...',
                 allowClear: true
             });

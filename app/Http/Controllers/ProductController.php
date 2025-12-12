@@ -6,6 +6,9 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Brand;
 use App\Models\Type;
+use Illuminate\Support\Facades\Storage;
+
+
 
 class ProductController extends Controller
 {
@@ -26,12 +29,16 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'brand_id' => 'required|string|max:255',
-            'type_id' => 'required|exists:types,id'
+            'type_id' => 'required|exists:types,id',
+            'foto'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
             'brand_id.required' => 'Brand harus diisi.',
             'type_id.required' => 'Type harus diisi.',
         ]);
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')->store('products', 'public');
+        }
         Product::create($validated);
         return redirect()->route('products.index')
             ->with('success', 'Product Berhasil Ditambah');
@@ -41,16 +48,22 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'foto'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
         ]);
+        if ($request->hasFile('foto')) {
+            if ($product->foto && Storage::disk('public')->exists($product->foto)) {
+                Storage::disk('public')->delete($product->foto);
+            }
+            $validated['foto'] = $request->file('foto')->store('products', 'public');
+        }
         $product->update($validated);
         return redirect()->route('products.index')
             ->with('success', 'Product Berhasil Diperbarui');
     }
     public function getLatestPrice(Product $product)
     {
-        // Ambil harga terakhir dari purchase item
         $lastPurchaseItem = $product->purchaseItems()->latest()->first();
     
         return response()->json([

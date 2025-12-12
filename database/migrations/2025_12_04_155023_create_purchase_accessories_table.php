@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('purchase_id')->constrained('purchases')->onDelete('cascade');
             $table->foreignId('accessory_id')->constrained('accessories')->onDelete('cascade');
             $table->integer('qty');
-            $table->integer('price');
+            $table->integer('price')->nullable();
             $table->timestamps();
         });
     }

@@ -10,7 +10,6 @@
       @endif
     </span>
     </a>
-
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
@@ -20,7 +19,6 @@
               <p>Dashboard</p>
             </a>
           </li>
-
           @if(Auth::check() && Auth::user()->role === 'manajer_operasional')
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
