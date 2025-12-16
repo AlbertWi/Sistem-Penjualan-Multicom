@@ -38,7 +38,11 @@
             <div class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">NEW</span>
-                    <img src="https://via.placeholder.com/400" alt="{{ $item->product->name }}" class="product-image">
+                    @if($item->product->foto)
+                        <img src="{{ asset('storage/' . $item->product->foto) }}" alt="{{ $item->product->name }}" class="product-image">
+                    @else
+                        <img src="https://via.placeholder.com/400" alt="{{ $item->product->name }}" class="product-image">
+                    @endif
                     <div class="product-overlay">
                         <a href="{{ route('catalog.show', $item) }}" class="quick-view-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -62,7 +66,7 @@
                         <span class="review-count">(24)</span>
                     </div>
                     <div class="product-price-wrapper">
-                        <div class="product-price">Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                        <div class="product-price">Rp {{ number_format($item->ecom_price ?? $item->price, 0, ',', '.') }}</div>
                     </div>
                     <a href="{{ route('catalog.show', $item) }}" class="product-btn">
                         View Details
@@ -88,7 +92,30 @@
         {{-- Pagination --}}
         @if($items->hasPages())
         <div class="pagination-wrapper">
-            {{ $items->links() }}
+            <ul class="pagination">
+                {{-- Previous Page Link --}}
+                @if ($items->onFirstPage())
+                    <li class="disabled"><span>&laquo;</span></li>
+                @else
+                    <li><a href="{{ $items->previousPageUrl() }}" rel="prev">&laquo;</a></li>
+                @endif
+
+                {{-- Pagination Elements --}}
+                @foreach ($items->getUrlRange(1, $items->lastPage()) as $page => $url)
+                    @if ($page == $items->currentPage())
+                        <li class="active"><span>{{ $page }}</span></li>
+                    @else
+                        <li><a href="{{ $url }}">{{ $page }}</a></li>
+                    @endif
+                @endforeach
+
+                {{-- Next Page Link --}}
+                @if ($items->hasMorePages())
+                    <li><a href="{{ $items->nextPageUrl() }}" rel="next">&raquo;</a></li>
+                @else
+                    <li class="disabled"><span>&raquo;</span></li>
+                @endif
+            </ul>
         </div>
         @endif
     </section>

@@ -1,33 +1,42 @@
 @extends('layouts.catalog')
 
+@section('title', 'Register - ' . config('app.name'))
+
 @section('content')
-<div class="container col-md-4 mt-5">
-    <h3>Register</h3>
+<div class="container">
+    <div class="auth-container">
+        <h3>Register</h3>
 
-    <form method="POST" action="{{ route('ecom.register') }}">
-        @csrf
+        <form method="POST" action="{{ route('ecom.register') }}">
+            @csrf
 
-        <div class="mb-3">
-            <label>Nama</label>
-            <input type="text" name="name" class="form-control" required>
-        </div>
+            <div class="form-group">
+                <label>Nama</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>Email</label>
-            <input type="email" name="email" class="form-control" required>
-        </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" required>
-        </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
 
-        <div class="mb-3">
-            <label>Konfirmasi Password</label>
-            <input type="password" name="password_confirmation" class="form-control" required>
-        </div>
+            <div class="form-group">
+                <label>Konfirmasi Password</label>
+                <input type="password" name="password_confirmation" class="form-control" required>
+            </div>
 
-        <button class="btn btn-success w-100">Daftar</button>
-    </form>
+            <button type="submit" class="btn btn-success btn-block">Daftar</button>
+
+            <div class="text-center mt-3">
+                Sudah punya akun?
+                <a href="{{ route('ecom.login') }}" class="auth-link">Login</a>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

@@ -1,5 +1,7 @@
 @extends('layouts.catalog')
 
+@section('title', ($inventoryItem->product->name ?? 'Product Detail') . ' - ' . config('app.name'))
+
 @section('content')
 <div class="product-detail-wrapper">
     <!-- Breadcrumb -->
@@ -31,7 +33,7 @@
                              class="main-product-image"
                              id="mainImage">
                     @else
-                        <img src="{{ asset('placeholder.png') }}" 
+                        <img src="https://via.placeholder.com/600x400" 
                              alt="No image"
                              class="main-product-image"
                              id="mainImage">
@@ -39,21 +41,17 @@
                     <div class="image-badge">NEW</div>
                 </div>
 
-                <!-- Thumbnail Gallery (if you have multiple images) -->
+                <!-- Thumbnail Gallery -->
                 <div class="thumbnail-gallery">
                     @if($inventoryItem->product->foto)
                         <div class="thumbnail-item active">
                             <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Thumbnail 1">
                         </div>
+                        @for($i = 2; $i <= 4; $i++)
                         <div class="thumbnail-item">
-                            <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Thumbnail 2">
+                            <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Thumbnail {{ $i }}">
                         </div>
-                        <div class="thumbnail-item">
-                            <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Thumbnail 3">
-                        </div>
-                        <div class="thumbnail-item">
-                            <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Thumbnail 4">
-                        </div>
+                        @endfor
                     @endif
                 </div>
             </div>
@@ -61,26 +59,16 @@
             <!-- Product Info -->
             <div class="product-info-section">
                 <div class="product-header">
-                    <span class="product-category">Electronics</span>
+                    <span class="product-category">{{ $inventoryItem->product->category ?? 'Electronics' }}</span>
                     <h1 class="product-title">{{ $inventoryItem->product->name ?? 'Product Name' }}</h1>
                     
                     <div class="product-rating-detail">
                         <div class="stars-large">
-                            <svg class="star-filled" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <svg class="star-filled" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <svg class="star-filled" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <svg class="star-filled" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            <svg class="star-empty" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
+                            @for($i = 1; $i <= 5; $i++)
+                                <svg class="{{ $i <= 4 ? 'star-filled' : 'star-empty' }}" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            @endfor
                         </div>
                         <span class="rating-text">4.0 (128 reviews)</span>
                     </div>
@@ -131,13 +119,13 @@
 
                 <div class="product-actions">
                     <div class="quantity-selector">
-                        <button class="qty-btn" onclick="decreaseQty()">
+                        <button class="qty-btn" type="button" onclick="decreaseQty()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="5" y1="12" x2="19" y2="12"/>
                             </svg>
                         </button>
                         <input type="number" class="qty-input" value="1" min="1" id="quantity">
-                        <button class="qty-btn" onclick="increaseQty()">
+                        <button class="qty-btn" type="button" onclick="increaseQty()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="5" x2="12" y2="19"/>
                                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -206,7 +194,7 @@
                         @if($inventoryItem->product->foto)
                             <img src="{{ asset('storage/' . $inventoryItem->product->foto) }}" alt="Related Product">
                         @else
-                            <img src="{{ asset('placeholder.png') }}" alt="Related Product">
+                            <img src="https://via.placeholder.com/400x300" alt="Related Product">
                         @endif
                     </div>
                     <div class="related-info">
@@ -219,38 +207,23 @@
         </div>
     </div>
 </div>
-
-
+@endsection
 
 @push('scripts')
 <script>
 // Quantity Controls
 function increaseQty() {
     const input = document.getElementById('quantity');
-    input.value = parseInt(input.value) + 1;
+    if (input) {
+        input.value = parseInt(input.value) + 1;
+    }
 }
 
 function decreaseQty() {
     const input = document.getElementById('quantity');
-    if (parseInt(input.value) > 1) {
+    if (input && parseInt(input.value) > 1) {
         input.value = parseInt(input.value) - 1;
     }
 }
-
-// Thumbnail Gallery
-document.addEventListener('DOMContentLoaded', function() {
-    const thumbnails = document.querySelectorAll('.thumbnail-item');
-    const mainImage = document.getElementById('mainImage');
-    
-    thumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('click', function() {
-            thumbnails.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            const imgSrc = this.querySelector('img').src;
-            mainImage.src = imgSrc;
-        });
-    });
-});
 </script>
 @endpush
-@endsection
