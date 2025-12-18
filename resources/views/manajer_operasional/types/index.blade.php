@@ -32,7 +32,7 @@
                 <!-- Modal Edit Type -->
                 <div class="modal fade" id="editTypeModal{{ $type->id }}" tabindex="-1" aria-labelledby="editTypeLabel{{ $type->id }}" aria-hidden="true">
                     <div class="modal-dialog">
-                        <form method="POST" action="{{ route('types.update', $type->id) }}">
+                        <form method="POST" action="{{ route('manajer_operasional.types.update', $type->id) }}">
                             @csrf
                             @method('PUT')
                             <div class="modal-content">
@@ -78,7 +78,7 @@
 <!-- Modal Tambah Type -->
 <div class="modal fade" id="createTypeModal" tabindex="-1" aria-labelledby="createTypeLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="{{ route('types.store') }}">
+        <form method="POST" action="{{ route('manajer_operasional.types.store') }}">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">

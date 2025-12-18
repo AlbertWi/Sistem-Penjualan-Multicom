@@ -42,7 +42,7 @@
                                     </button>
 
                                     <!-- Tombol Hapus -->
-                                    <form action="{{ route('customers.destroy', $customer->id) }}" method="POST" class="d-inline"
+                                    <form action="{{ route('manajer_operasional.customers.destroy', $customer->id) }}" method="POST" class="d-inline"
                                           onsubmit="return confirm('Yakin ingin menghapus customer ini?')">
                                         @csrf
                                         @method('DELETE')
@@ -55,7 +55,7 @@
                             <div class="modal fade" id="editCustomerModal{{ $customer->id }}" tabindex="-1" role="dialog" aria-labelledby="editCustomerModalLabel{{ $customer->id }}" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
-                                        <form action="{{ route('customers.update', $customer->id) }}" method="POST">
+                                        <form action="{{ route('manajer_operasional.customers.update', $customer->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="modal-header">

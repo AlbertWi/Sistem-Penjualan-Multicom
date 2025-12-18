@@ -22,7 +22,7 @@
                     <td>{{ $branch->name }}</td>
                     <td>{{ $branch->address }}</td>
                     <td>
-                        <a href="{{ route('inventory.show', $branch->id) }}" class="btn btn-info btn-sm">
+                        <a href="{{ route('manajer_operasional.inventory.show', $branch->id) }}" class="btn btn-info btn-sm">
                             Lihat Stok
                         </a>
                     </td>

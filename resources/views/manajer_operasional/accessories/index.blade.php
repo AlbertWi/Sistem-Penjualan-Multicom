@@ -5,7 +5,7 @@
 @section('content')
 <div class="container">
     <h1 class="mb-4">Daftar Accessories</h1>
-    <a href="{{ route('accessories.create') }}" class="btn btn-primary mb-3">+ Tambah Accessory</a>
+    <a href="{{ route('manajer_operasional.accessories.create') }}" class="btn btn-primary mb-3">+ Tambah Accessory</a>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -25,8 +25,8 @@
                     <td>{{ $item->id }}</td>
                     <td>{{ $item->name }}</td>
                     <td>
-                        <a href="{{ route('accessories.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <form action="{{ route('accessories.destroy', $item->id) }}" method="POST" style="display:inline-block">
+                        <a href="{{ route('manajer_operasional.accessories.edit', $item->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <form action="{{ route('manajer_operasional.accessories.destroy', $item->id) }}" method="POST" style="display:inline-block">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Hapus accessory ini?')">Hapus</button>
                         </form>

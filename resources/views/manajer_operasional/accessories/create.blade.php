@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form action="{{ route('accessories.store') }}" method="POST">
+    <form action="{{ route('manajer_operasional.accessories.store') }}" method="POST">
         @csrf
         <div class="form-group mb-3">
             <label for="name">Nama</label>
@@ -29,7 +29,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="{{ route('accessories.index') }}" class="btn btn-secondary">Batal</a>
+        <a href="{{ route('manajer_operasional.accessories.index') }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 @endsection

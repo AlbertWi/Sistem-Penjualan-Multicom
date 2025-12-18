@@ -41,6 +41,7 @@ class EcomAuthController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:customers,email',
             'password' => 'required|min:6|confirmed',
+            'phone' => 'required|string|unique:customers,phone',
         ]);
 
         $data['password'] = Hash::make($data['password']);
@@ -57,5 +58,52 @@ class EcomAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('catalog.index');
+    }
+    public function profile()
+    {
+        $customer = auth('customer')->user();
+        return view('ecom.profile', compact('customer'));
+    }
+    public function profileUpdate(Request $request)
+    {
+        $customer = auth('customer')->user();
+        $request->validate([
+            'name'  => 'required',
+            'email' => 'required|email|unique:customers,email,' . $customer->id,
+            'phone' => 'required|unique:customers,phone,' . $customer->id,
+            'jenis_kelamin' => 'nullable|in:pria,wanita',
+            'tanggal_lahir' => 'nullable|date',
+            'password' => 'nullable|min:6',
+        ]);
+
+        $customer->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'tanggal_lahir' => $request->tanggal_lahir,
+        ]);
+
+        /** jika password diganti */
+        if ($request->filled('password')) {
+
+            $request->validate([
+                'current_password' => 'required',
+            ]);
+
+            if (!Hash::check($request->current_password, $customer->password)) {
+                return back()->withErrors(['current_password' => 'Password lama tidak cocok']);
+            }
+
+            $customer->password = Hash::make($request->password);
+            $customer->save();
+        }
+
+        return back()->with('success', 'Profile berhasil diperbarui');
+    }
+    public function editProfile()
+    {
+        $customer = auth('customer')->user();
+        return view('ecom.profile', compact('customer'));
     }
 }

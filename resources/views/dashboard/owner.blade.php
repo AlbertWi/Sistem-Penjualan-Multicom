@@ -26,7 +26,7 @@
             <div class="icon">
                 <i class="fas fa-store-alt"></i>
             </div>
-            <a href="{{ route('branches.index') }}" class="small-box-footer">Lihat Cabang <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ route('owner.branches.index') }}" class="small-box-footer">Lihat Cabang <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
     <div class="col-lg-4 col-12">
@@ -38,7 +38,7 @@
             <div class="icon">
                 <i class="fas fa-users-cog"></i>
             </div>
-            <a href="{{ route('users.index') }}" class="small-box-footer">Kelola User <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ route('owner.users.index') }}" class="small-box-footer">Kelola User <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
     <div class="card mt-4">

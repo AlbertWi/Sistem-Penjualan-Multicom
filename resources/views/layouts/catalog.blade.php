@@ -1306,7 +1306,7 @@
                 </div>
                 <div class="header-icons">
                     @auth
-                        <a href="#">
+                        <a href="profile">
                             <i class="far fa-user"></i>
                         </a>
                     @else
@@ -1345,7 +1345,6 @@
                     <li><a href="#"><i class="fas fa-percent"></i> Promo</a></li>
                     <li><a href="#"><i class="fas fa-headset"></i> Bantuan</a></li>
                 </ul>
-                <div class="nav-promo">Diskon hingga 70%</div>
             </div>
         </nav>
     </header>
@@ -1354,56 +1353,6 @@
     <main class="main-content">
         @yield('content')
     </main>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h3>{{ config('app.name', 'ShopOnline') }}</h3>
-                    <p>Belanja online terpercaya dengan jutaan produk berkualitas. Kami memberikan pengalaman berbelanja terbaik dengan harga kompetitif dan layanan pelanggan 24/7.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h3>Bantuan & Panduan</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Cara Berbelanja</a></li>
-                        <li><a href="#">Pembayaran</a></li>
-                        <li><a href="#">Pengiriman</a></li>
-                        <li><a href="#">Pengembalian Barang</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Tentang Kami</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Tentang {{ config('app.name', 'ShopOnline') }}</a></li>
-                        <li><a href="#">Karir</a></li>
-                        <li><a href="#">Kebijakan Privasi</a></li>
-                        <li><a href="#">Syarat & Ketentuan</a></li>
-                        <li><a href="#">Hubungi Kami</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Berlangganan Newsletter</h3>
-                    <p>Dapatkan informasi promo dan produk terbaru langsung ke email Anda.</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Masukkan email Anda">
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; {{ date('Y') }} {{ config('app.name', 'ShopOnline') }}. All rights reserved. | Developed with <i class="fas fa-heart" style="color: #e74c3c;"></i></p>
-            </div>
-        </div>
-    </footer>
-
     <!-- JavaScript -->
     <script>
         // Mobile menu toggle

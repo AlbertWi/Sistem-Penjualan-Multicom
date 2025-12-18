@@ -49,7 +49,12 @@ Route::prefix('ecom')->name('ecom.')->group(function () {
 Route::middleware('auth:customer')->group(function () {
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/profile', [EcomAuthController::class, 'profile'])->name('ecom.profile');
+    Route::post('/profile/update', [EcomAuthController::class, 'profileUpdate'])->name('ecom.profile.update');
+    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('ecom.logout');
 });
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
@@ -71,17 +76,23 @@ Route::middleware('auth')->group(function () {
         // Reports
         Route::get('/report/stock-summary', [StockReportController::class, 'rekap'])->name('report.stock-summary');
     });
+
+
     Route::middleware('role:owner,kepala_toko,manajer_operasional')->group(function () {
         Route::get('/stok-cabang', [BranchStockController::class, 'index'])->name('stok-cabang');
     });
+
+
     Route::middleware('role:manajer_operasional,owner')->group(function () {
         Route::resource('inventory', InventoryItemController::class);
     });
+
+
+
     Route::middleware('role:owner')->prefix('owner')->name('owner.')->group(function () {
         // Master Data
         Route::resource('branches', BranchController::class);
         Route::resource('users', UserController::class);
-        
         // Sales Management
         Route::get('/sales', [SaleController::class, 'ownerIndex'])->name('sales.index');
         Route::post('/sales/{sale}/pelunasan', [SaleController::class, 'pelunasan'])->name('sales.pelunasan');
@@ -99,6 +110,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/stocksReport/print', [StockReportController::class, 'print'])->name('stocksReport.print');
         Route::get('/stocksReport/pdf', [StockReportController::class, 'pdf'])->name('stocksReport.pdf');
     });
+
+
+
+
     Route::middleware('role:manajer_operasional')->prefix('manajer_operasional')->name('manajer_operasional.')->group(function () {
         // Master Data
         Route::resource('products', ProductController::class);
@@ -123,6 +138,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/{inventoryItem}/post', [ManagerProductController::class, 'postToCatalog'])->name('inventory.post');
         Route::post('/inventory/{inventoryItem}/unpost', [ManagerProductController::class, 'unpostFromCatalog'])->name('inventory.unpost');
     });
+
+
+
+
     Route::middleware('role:kepala_toko')->group(function () {
         // Product Management
         Route::resource('product', ProductController::class);

@@ -6,7 +6,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="card-title">Daftar User</h3>
-            <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">+ Tambah User</a>
+            <a href="{{ route('owner.users.create') }}" class="btn btn-primary btn-sm">+ Tambah User</a>
         </div>
         <div class="card-body">
             <table class="table table-bordered">
@@ -27,7 +27,7 @@
                             <td>{{ $user->role }}</td>
                             <td>{{ $user->branch->name ?? '-' }}</td>
                             <td>
-                                <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{{ route('owner.users.edit', $user) }}" class="btn btn-warning btn-sm">Edit</a>
                             </td>
                         </tr>
                     @endforeach

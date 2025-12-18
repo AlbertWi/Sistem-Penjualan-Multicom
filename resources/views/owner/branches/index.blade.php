@@ -36,7 +36,7 @@
                     <div class="modal fade" id="editBranchModal{{ $branch->id }}" tabindex="-1"
                         aria-labelledby="editBranchModalLabel{{ $branch->id }}" aria-hidden="true">
                         <div class="modal-dialog">
-                            <form action="{{ route('branches.update', $branch) }}" method="POST">
+                            <form action="{{ route('owner.branches.update', $branch) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <div class="modal-content">
@@ -95,7 +95,7 @@
 <div class="modal fade" id="createBranchModal" tabindex="-1" aria-labelledby="createBranchModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
-        <form action="{{ route('branches.store') }}" method="POST">
+        <form action="{{ route('owner.branches.store') }}" method="POST">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">

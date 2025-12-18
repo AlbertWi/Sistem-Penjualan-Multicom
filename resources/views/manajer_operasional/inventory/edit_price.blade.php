@@ -13,7 +13,7 @@
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <form action="{{ route('inventory.updatePrice') }}" method="POST">
+            <form action="{{ route('manajer_operasional.inventory.updatePrice') }}" method="POST">
                 @csrf
                 <div class="form-group mb-3">
                     <label for="type_id">Pilih Produk</label>

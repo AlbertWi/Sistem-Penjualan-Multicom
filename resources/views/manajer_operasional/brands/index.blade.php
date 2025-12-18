@@ -11,7 +11,7 @@
     <!-- Modal Tambah Brand -->
     <div class="modal fade" id="createBrandModal" tabindex="-1" aria-labelledby="createBrandLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="{{ route('brands.store') }}">
+            <form method="POST" action="{{ route('manajer_operasional.brands.store') }}">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
@@ -74,7 +74,7 @@
                 <!-- Modal Edit Brand -->
                 <div class="modal fade" id="editBrandModal{{ $brand->id }}" tabindex="-1" aria-labelledby="editBrandLabel{{ $brand->id }}" aria-hidden="true">
                     <div class="modal-dialog">
-                        <form method="POST" action="{{ route('brands.update', $brand->id) }}">
+                        <form method="POST" action="{{ route('manajer_operasional.brands.update', $brand->id) }}">
                             @csrf
                             @method('PUT')
                             <div class="modal-content">

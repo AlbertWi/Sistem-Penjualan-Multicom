@@ -24,7 +24,7 @@ class StockTransferController extends Controller
         $stockTransfers = StockTransfer::latest()->get();
     }
 
-    return view('kepala_toko.stock_transfers.index', compact('stockTransfers'));
+    return view('manajer_operasional.stock_transfers.index', compact('stockTransfers'));
     }   
 
     public function create()

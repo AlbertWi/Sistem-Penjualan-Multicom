@@ -30,31 +30,31 @@
             </a>
             <ul class="nav nav-treeview">
                 <li class="nav-item">
-                    <a href="{{ route('brands.index') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.brands.index') }}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Brand</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('types.index') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.types.index') }}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Type</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('products.index') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.products.index') }}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Produk</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('accessories.index') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.accessories.index') }}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Accesories</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{{ route('inventory.editPrice') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.inventory.editPrice') }}" class="nav-link">
                         <i class="far fa-circle nav-icon text-warning"></i>
                         <p>Ubah Harga Modal</p>
                     </a>
@@ -62,13 +62,13 @@
             </ul>
         </li>
             <li class="nav-item">
-                    <a href="{{ route('customers.index') }}" class="nav-link">
+                    <a href="{{ route('manajer_operasional.customers.index') }}" class="nav-link">
                         <i class="far fa-circle nav-icon"></i>
                         <p>Customer</p>
                     </a>
                 </li>
             <li class="nav-item">
-              <a href="{{ route('suppliers.index') }}" class="nav-link">
+              <a href="{{ route('manajer_operasional.suppliers.index') }}" class="nav-link">
                 <i class="nav-icon fas fa-truck"></i>
                 <p>Supplier</p>
               </a>
@@ -98,7 +98,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('inventory.for_ecom') }}" class="nav-link">
+                <a href="{{ route('manajer_operasional.inventory.for_ecom') }}" class="nav-link">
                     <i class="nav-icon fas fa-shopping-cart"></i>
                     <p>Produk E-Commerce</p>
                 </a>
@@ -129,12 +129,6 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="{{ route('stock-requests.index') }}" class="nav-link">
-                <i class="nav-icon fas fa-cash-register"></i>
-                <p>Permintaan Barang</p>
-              </a>
-            </li>
-            <li class="nav-item">
                 <a href="{{ route('report.stock-summary') }}" class="nav-link">
                     <i class="nav-icon fas fa-boxes"></i>
                     <p>CEK STOK</p>
@@ -148,13 +142,13 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="{{ route('branches.index') }}" class="nav-link">
+              <a href="{{ route('owner.branches.index') }}" class="nav-link">
                 <i class="nav-icon fas fa-store"></i>
                 <p>Manajemen Cabang</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="{{ route('users.index') }}" class="nav-link">
+              <a href="{{ route('owner.users.index') }}" class="nav-link">
                 <i class="nav-icon fas fa-users-cog"></i>
                 <p>Manajemen User</p>
               </a>

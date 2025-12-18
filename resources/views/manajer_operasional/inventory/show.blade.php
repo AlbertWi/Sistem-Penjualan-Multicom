@@ -6,7 +6,7 @@
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Stok Barang di Cabang {{ $branch->name }}</h3>
-        <a href="{{ route('inventory.index') }}" class="btn btn-secondary btn-sm float-right">Kembali</a>
+        <a href="{{ route('manajer_operasional.inventory.index') }}" class="btn btn-secondary btn-sm float-right">Kembali</a>
     </div>
     <div class="card-body">
         @if($inventory->isEmpty())

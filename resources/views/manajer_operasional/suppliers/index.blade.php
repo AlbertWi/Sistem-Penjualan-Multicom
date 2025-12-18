@@ -48,7 +48,7 @@
                 <!-- Modal Edit -->
                 <div class="modal fade" id="editSupplierModal{{ $supplier->id }}" tabindex="-1">
                     <div class="modal-dialog">
-                        <form method="POST" action="{{ route('suppliers.update', $supplier->id) }}">
+                        <form method="POST" action="{{ route('manajer_operasional.suppliers.update', $supplier->id) }}">
                             @csrf
                             @method('PUT')
                             <div class="modal-content">
@@ -92,7 +92,7 @@
 <!-- Modal Tambah -->
 <div class="modal fade" id="createSupplierModal" tabindex="-1">
     <div class="modal-dialog">
-        <form method="POST" action="{{ route('suppliers.store') }}">
+        <form method="POST" action="{{ route('manajer_operasional.suppliers.store') }}">
             @csrf
             <div class="modal-content">
                 <div class="modal-header">

@@ -17,7 +17,7 @@
             @endif
         <h3 class="card-title">Edit User</h3>
     </div>
-    <form action="{{ route('users.update', $user->id) }}" method="POST">
+    <form action="{{ route('owner.users.update', $user->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="card-body">
@@ -40,7 +40,7 @@
         </div>
         <div class="card-footer">
             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-            <a href="{{ route('users.index') }}" class="btn btn-secondary">Batal</a>
+            <a href="{{ route('owner.users.index') }}" class="btn btn-secondary">Batal</a>
         </div>
     </form>
 </div>

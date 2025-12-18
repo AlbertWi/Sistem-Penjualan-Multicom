@@ -51,7 +51,7 @@ class UserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
         User::create($validated);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('owner.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -103,6 +103,6 @@ class UserController extends Controller
         }
 
         $user->update($validated);
-        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
+        return redirect()->route('owner.users.index')->with('success', 'User berhasil diperbarui.');
     }
 }

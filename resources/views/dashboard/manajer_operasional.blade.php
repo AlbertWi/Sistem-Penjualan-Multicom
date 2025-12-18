@@ -13,7 +13,7 @@
             <div class="icon">
                 <i class="fas fa-box"></i>
             </div>
-            <a href="{{ route('products.index') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ route('manajer_operasional.products.index') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
     <div class="col-lg-3 col-6">
@@ -25,7 +25,7 @@
             <div class="icon">
                 <i class="fas fa-truck"></i>
             </div>
-            <a href="{{ route('suppliers.index') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ route('manajer_operasional.suppliers.index') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
     <div class="col-lg-3 col-6">

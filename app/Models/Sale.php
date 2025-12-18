@@ -9,7 +9,7 @@ class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = [    'customer_id','user_id', 'branch_id', 'total','status',];
+    protected $fillable = ['customer_id','user_id', 'branch_id', 'total','status',];
 
     public function user() {
         return $this->belongsTo(User::class);

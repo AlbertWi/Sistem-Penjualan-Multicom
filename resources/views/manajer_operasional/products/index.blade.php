@@ -19,7 +19,7 @@
             + Tambah Produk
         </button>
 
-        <form method="GET" action="{{ route('products.index') }}" class="d-flex" style="max-width: 300px;">
+        <form method="GET" action="{{ route('manajer_operasional.products.index') }}" class="d-flex" style="max-width: 300px;">
             <input type="text" name="q" class="form-control me-2" placeholder="Cari nama produk..." value="{{ request('q') }}">
             <button type="submit" class="btn btn-primary">Cari</button>
         </form>
@@ -44,7 +44,7 @@
                     <td>
                         @if($product->foto)
                             <img src="{{ asset('storage/'.$product->foto) }}"
-                                 alt="Foto" width="60" height="60" class="rounded">
+                                alt="Foto" width="60" height="60" class="rounded">
                         @else
                             <span class="text-muted">Tidak ada</span>
                         @endif
@@ -64,8 +64,8 @@
                 <!-- Modal Edit -->
                 <div class="modal fade" id="editProductModal{{ $product->id }}" tabindex="-1">
                     <div class="modal-dialog">
-                        <form method="POST" action="{{ route('products.update', $product->id) }}"
-                              enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('manajer_operasional.products.update', $product->id) }}"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="modal-content">
@@ -121,7 +121,7 @@
 <!-- Modal Tambah Produk -->
 <div class="modal fade" id="createProductModal" tabindex="-1">
     <div class="modal-dialog">
-        <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('manajer_operasional.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-content">
 

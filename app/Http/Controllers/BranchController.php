@@ -26,7 +26,7 @@ class BranchController extends Controller
         $branchCode = 'BR' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
         $validated['code'] = $branchCode;
         Branch::create($validated);
-        return redirect()->route('branches.index')->with('success', 'Cabang berhasil ditambahkan.');
+        return redirect()->route('owner.branches.index')->with('success', 'Cabang berhasil ditambahkan.');
     }
 
     public function update(Request $request, $id)
@@ -41,6 +41,6 @@ class BranchController extends Controller
         ]);
         $validated['code'] = $branch->code;
         $branch->update($validated);
-        return redirect()->route('branches.index')->with('success', 'Cabang berhasil diperbarui.');
+        return redirect()->route('owner.branches.index')->with('success', 'Cabang berhasil diperbarui.');
     }
 }
