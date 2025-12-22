@@ -20,7 +20,7 @@ class TypeController extends Controller
             'name.required' => 'Nama Type harus diisi.',
         ]);
         Type::create(['name' => $request->name]);
-        return redirect()->route('types.index')->with('success', 'Tipe berhasil ditambahkan.');
+        return redirect()->route('manajer_operasional.types.index')->with('success', 'Tipe berhasil ditambahkan.');
     }
     public function update(Request $request, Type $type)
     {
@@ -30,6 +30,6 @@ class TypeController extends Controller
             'name.required' => 'Nama Type harus diisi.',
         ]);
         $type->update(['name' => $request->name]);
-        return redirect()->route('types.index')->with('success', 'Tipe berhasil diperbarui.');
+        return redirect()->route('manajer_operasional.types.index')->with('success', 'Tipe berhasil diperbarui.');
     }
 }

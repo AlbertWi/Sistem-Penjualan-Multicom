@@ -40,7 +40,7 @@ class ProductController extends Controller
             $validated['foto'] = $request->file('foto')->store('products', 'public');
         }
         Product::create($validated);
-        return redirect()->route('products.index')
+        return redirect()->route('manajer_operasional.products.index')
             ->with('success', 'Product Berhasil Ditambah');
     }
     public function update(Request $request, $id)
@@ -59,7 +59,7 @@ class ProductController extends Controller
             $validated['foto'] = $request->file('foto')->store('products', 'public');
         }
         $product->update($validated);
-        return redirect()->route('products.index')
+        return redirect()->route('manajer_operasional.products.index')
             ->with('success', 'Product Berhasil Diperbarui');
     }
     public function getLatestPrice(Product $product)

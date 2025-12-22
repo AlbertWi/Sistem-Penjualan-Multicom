@@ -51,7 +51,6 @@ Route::middleware('auth:customer')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/profile', [EcomAuthController::class, 'profile'])->name('ecom.profile');
     Route::post('/profile/update', [EcomAuthController::class, 'profileUpdate'])->name('ecom.profile.update');
-    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('ecom.logout');
 });
 
 

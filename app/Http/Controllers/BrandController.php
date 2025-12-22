@@ -23,7 +23,7 @@ class BrandController extends Controller
         Brand::create([
             'name' => $request->name,
         ]);
-        return redirect()->route('brands.index')->with('success', 'Merek berhasil ditambahkan.');
+        return redirect()->route('manajer_operasional.brands.index')->with('success', 'Merek berhasil ditambahkan.');
     }
     public function update(Request $request, $id)
     {
