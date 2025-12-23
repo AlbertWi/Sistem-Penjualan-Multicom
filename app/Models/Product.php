@@ -9,7 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','brand_id','type_id','foto'];
+    protected $fillable = ['name','brand_id','type_id','foto','specification'];
 
     public function inventoryItems() {
         return $this->hasMany(InventoryItem::class);
@@ -26,6 +26,9 @@ class Product extends Model
     {
         return $this->hasMany(PurchaseItem::class);
     }
-    
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 
 }

@@ -30,14 +30,21 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'brand_id' => 'required|string|max:255',
             'type_id' => 'required|exists:types,id',
-            'foto'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'specification' => 'required|string|max:10000',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
             'brand_id.required' => 'Brand harus diisi.',
             'type_id.required' => 'Type harus diisi.',
         ]);
         if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('products', 'public');
+            foreach ($request->file('foto') as $file) {
+                $path = $file->store('products', 'public');
+                \App\Models\ProductImage::create([
+                    'product_id' => $product->id,
+                    'file_path'  => $path,
+                ]);
+            }
         }
         Product::create($validated);
         return redirect()->route('manajer_operasional.products.index')
@@ -48,19 +55,11 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'foto'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
         ]);
-        if ($request->hasFile('foto')) {
-            if ($product->foto && Storage::disk('public')->exists($product->foto)) {
-                Storage::disk('public')->delete($product->foto);
-            }
-            $validated['foto'] = $request->file('foto')->store('products', 'public');
-        }
         $product->update($validated);
-        return redirect()->route('manajer_operasional.products.index')
-            ->with('success', 'Product Berhasil Diperbarui');
+        return redirect()->route('manajer_operasional.products.index')->with('success', 'Product Berhasil Diperbarui');
     }
     public function getLatestPrice(Product $product)
     {

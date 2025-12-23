@@ -27,7 +27,9 @@ use App\Http\Controllers\{
     ManagerProductController,
     StockRequestController
 };
-
+Route::get('/ajax/types-by-brand/{brand_id}', function($brand_id) {
+    return \App\Models\Type::where('brand_id', $brand_id)->get();
+});
 // Catalog
 Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/product/{inventoryItem}', [CatalogController::class, 'show'])->name('catalog.show');

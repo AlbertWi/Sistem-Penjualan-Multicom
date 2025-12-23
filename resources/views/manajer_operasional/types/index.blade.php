@@ -12,6 +12,7 @@
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
+                <th>Brand</th>
                 <th>Nama Type</th>
                 <th>Aksi</th>
             </tr>
@@ -20,15 +21,14 @@
             @foreach($types as $type)
                 <tr>
                     <td>{{ $type->id }}</td>
+                    <td>{{ $type->brand->name  }}</td>
                     <td>{{ $type->name }}</td>
                     <td>
-                        <!-- Tombol Edit Type (Modal) -->
                         <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editTypeModal{{ $type->id }}">
                             Edit
                         </button>
                     </td>
                 </tr>
-
                 <!-- Modal Edit Type -->
                 <div class="modal fade" id="editTypeModal{{ $type->id }}" tabindex="-1" aria-labelledby="editTypeLabel{{ $type->id }}" aria-hidden="true">
                     <div class="modal-dialog">
@@ -38,6 +38,25 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="editTypeLabel{{ $type->id }}">Edit Type</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label>Brand</label>
+                                        <select name="brand_id" class="form-control">
+                                            @foreach($brands as $brand)
+                                                <option value="{{ $brand->id }}" {{ $brand->id == $type->brand_id ? 'selected' : '' }}>
+                                                    {{ $brand->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="typeName{{ $type->id }}" class="form-label">Nama Type</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            name="name"
+                                            value="{{ $type->name }}">
+                                    </div>
                                 </div>
                                 <div class="modal-body">
                                     @if ($errors->any() && old('_method') == 'PUT' && old('type_id') == $type->id)
@@ -94,6 +113,17 @@
                             </ul>
                         </div>
                     @endif
+                    <div class="mb-2">
+                        <label>Brand</label>
+                        <select name="brand_id" id="brandSelect" class="form-control">
+                            <option value="">-- Pilih Brand --</option>
+                            @foreach($brands as $brand)
+                                <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">
+                                    {{ $brand->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Nama Type</label>
                         <input type="text" class="form-control @error('name') @if(!old('_method')) is-invalid @endif @enderror" 

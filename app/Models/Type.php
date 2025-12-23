@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Type extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['brand_id','name'];
 
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
     }
 }

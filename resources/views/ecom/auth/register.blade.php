@@ -33,7 +33,7 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
-            <button type="submit" class="btn btn-success btn-block">Daftar</button>
+            <button type="submit" href="{{ route('ecom.login') }}" class="btn btn-success btn-block">Daftar</button>
 
             <div class="text-center mt-3">
                 Sudah punya akun?

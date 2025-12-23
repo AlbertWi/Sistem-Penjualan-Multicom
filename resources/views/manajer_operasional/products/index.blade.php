@@ -42,9 +42,9 @@
                     <td>{{ $product->id }}</td>
 
                     <td>
-                        @if($product->foto)
-                            <img src="{{ asset('storage/'.$product->foto) }}"
-                                alt="Foto" width="60" height="60" class="rounded">
+                        @if($product->images->count())
+                            <img src="{{ asset('storage/'.$product->images->first()->file_path) }}"
+                            width="60" height="60">
                         @else
                             <span class="text-muted">Tidak ada</span>
                         @endif
@@ -79,7 +79,7 @@
                                         @if($product->foto)
                                             <img src="{{ asset('storage/'.$product->foto) }}" width="80" class="mb-2 rounded">
                                         @endif
-                                        <input type="file" name="foto" class="form-control">
+                                        <input type="file" name="foto[]" multiple class="form-control">
                                     </div>
 
                                     <div class="mb-2">
@@ -133,7 +133,7 @@
 
                     <div class="mb-2">
                         <label>Foto Produk</label>
-                        <input type="file" name="foto" class="form-control">
+                        <input type="file" name="foto[]" multiple class="form-control">
                     </div>
 
                     <div class="mb-2">
@@ -158,6 +158,11 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+                    <div class="mb-2">
+                        <label>Spesifikasi Produk</label>
+                        <textarea name="specification" class="form-control" rows="4"
+                            placeholder="RAM, ROM, Processor, Kamera, Kondisi, dll..."></textarea>
                     </div>
 
                     <div class="mb-2">
@@ -190,7 +195,24 @@
             productName.value = brand && type ? `${brand} ${type}` : '';
         }
 
-        brandSelect.addEventListener('change', updateProductName);
+        brandSelect.addEventListener('change', function() {
+            fetch(`/ajax/types-by-brand/${brandSelect.value}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    typeSelect.innerHTML = `<option value="">-- Pilih Type --</option>`;
+
+                    data.forEach(t => {
+                        typeSelect.innerHTML += `
+                            <option value="${t.id}" data-name="${t.name}">
+                                ${t.name}
+                            </option>`;
+                    });
+
+                    updateProductName();
+                });
+
+        });
         typeSelect.addEventListener('change', updateProductName);
     });
 </script>
