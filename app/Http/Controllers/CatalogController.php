@@ -7,7 +7,7 @@ class CatalogController extends Controller
 {
     public function index()
     {
-        $items = InventoryItem::with('product.brand')
+        $items = InventoryItem::with('product.brand','product.images')
                     ->inStock()
                     ->listed()
                     ->paginate(20);

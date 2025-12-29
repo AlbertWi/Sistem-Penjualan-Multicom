@@ -68,6 +68,13 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'ram' => 'required|integer',
+            'rom' => 'required|integer',
+            'baterai' => 'required|integer',
+            'ukuran_layar' => 'required|numeric',
+            'masa_garansi' => 'required|integer',
+            'resolusi_kamera' => 'required|string',
+            'jumlah_slot_sim' => 'required|integer|in:1,2',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
         ]);

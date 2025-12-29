@@ -8,7 +8,6 @@
     <section class="catalog-hero">
         <div class="container">
             <div class="hero-content">
-                <h1 class="hero-title">Product Catalog</h1>
                 <p class="hero-subtitle">Discover our collection of premium products</p>
             </div>
         </div>
@@ -38,10 +37,17 @@
             <div class="product-card">
                 <div class="product-image-wrapper">
                     <span class="product-badge">NEW</span>
-                    @if($item->product->foto)
-                        <img src="{{ asset('storage/' . $item->product->foto) }}" alt="{{ $item->product->name }}" class="product-image">
+                    @php
+                        $image = $item->product->images->first();
+                    @endphp
+                    @if($image)
+                        <img src="{{ asset('storage/' . $image->file_path) }}"
+                            class="product-image"
+                            alt="{{ $item->product->name }}">
                     @else
-                        <img src="https://via.placeholder.com/400" alt="{{ $item->product->name }}" class="product-image">
+                        <img src="https://via.placeholder.com/400"
+                            class="product-image"
+                            alt="{{ $item->product->name }}">
                     @endif
                     <div class="product-overlay">
                         <a href="{{ route('catalog.show', $item) }}" class="quick-view-btn">

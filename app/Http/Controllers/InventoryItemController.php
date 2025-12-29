@@ -9,14 +9,11 @@ use App\Models\Type;
 
 class InventoryItemController extends Controller
 {
-    // Menampilkan stok per cabang
     public function index()
     {
         $branches = Branch::all();
         return view('admin.inventory.index', compact('branches'));
     }
-
-    // Menampilkan stok untuk cabang tertentu
     public function show($branchId)
     {
         $branch = Branch::findOrFail($branchId);
@@ -55,4 +52,5 @@ class InventoryItemController extends Controller
     
         return redirect()->back()->with('success', "Harga modal berhasil diperbarui untuk {$updated} item.");
     }
+
 }

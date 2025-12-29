@@ -6,13 +6,26 @@ use Illuminate\Http\Request;
 
 class ManagerProductController extends Controller
 {
-    public function index()
+    public function index(Request $request) // ← TAMBAHKAN Request $request
     {
-        // tampilkan semua in_stock
-        $items = InventoryItem::with('product.brand')
-                    ->inStock()
-                    ->orderBy('created_at','desc')
-                    ->paginate(30);
+        $q = $request->input('q');
+
+        $items = InventoryItem::with(['product.brand'])
+            ->where('status', 'in_stock') // Filter hanya yang in_stock
+            ->when($q, function ($query) use ($q) {
+                return $query->where(function($subQuery) use ($q) {
+                    $subQuery->where('imei', 'like', "%{$q}%")
+                        ->orWhereHas('product', function ($p) use ($q) {
+                            $p->where('name', 'like', "%{$q}%");
+                        })
+                        ->orWhereHas('product.brand', function ($b) use ($q) {
+                            $b->where('name', 'like', "%{$q}%");
+                        });
+                });
+            })
+            ->latest()
+            ->paginate(30)
+            ->appends(['q' => $q]);
 
         return view('manajer_operasional.inventory.for_ecom', compact('items'));
     }

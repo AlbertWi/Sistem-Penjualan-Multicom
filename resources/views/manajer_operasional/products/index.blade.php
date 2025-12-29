@@ -76,8 +76,9 @@
 
                                         <div class="mb-2">
                                             <label>Foto Produk</label><br>
-                                            @if($product->foto)
-                                                <img src="{{ asset('storage/'.$product->foto) }}" width="80" class="mb-2 rounded">
+                                            @if($product->images->count())
+                                                <img src="{{ asset('storage/'.$product->images->first()->file_path) }}"
+                                                width="80" class="mb-2 rounded">
                                             @endif
                                             <input type="file" name="foto[]" multiple class="form-control">
                                         </div>
@@ -102,64 +103,74 @@
                                             <div class="col-md-6 mb-2">
                                                 <label>RAM (GB)</label>
                                                 <select name="ram" class="form-control" required>
-                                                    <option value="">Pilih RAM</option>
                                                     @foreach([2,4,6,8,12,16,24,32] as $ram)
-                                                        <option value="{{ $ram }}">{{ $ram }} GB</option>
+                                                        <option value="{{ $ram }}"
+                                                            {{ $product->ram == $ram ? 'selected' : '' }}>
+                                                            {{ $ram }} GB
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>ROM (GB)</label>
                                                 <select name="rom" class="form-control" required>
-                                                    <option value="">Pilih ROM</option>
                                                     @foreach([32,64,128,256,512,1024] as $rom)
-                                                        <option value="{{ $rom }}">{{ $rom }} GB</option>
+                                                        <option value="{{ $rom }}"
+                                                            {{ $product->rom == $rom ? 'selected' : '' }}>
+                                                            {{ $rom }} GB
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>Baterai (mAh)</label>
                                                 <select name="baterai" class="form-control" required>
                                                     @foreach([4000,4500,5000,6000] as $bat)
-                                                        <option value="{{ $bat }}">{{ $bat }} mAh</option>
+                                                        <option value="{{ $bat }}"
+                                                            {{ $product->baterai == $bat ? 'selected' : '' }}>
+                                                            {{ $bat }} mAh
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>Ukuran Layar (inci)</label>
                                                 <select name="ukuran_layar" class="form-control" required>
                                                     @foreach([5.5,6.1,6.5,6.7,6.8] as $layar)
-                                                        <option value="{{ $layar }}">{{ $layar }}"</option>
+                                                        <option value="{{ $layar }}"
+                                                            {{ $product->ukuran_layar == $layar ? 'selected' : '' }}>
+                                                            {{ $layar }}"
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>Masa Garansi (bulan)</label>
                                                 <select name="masa_garansi" class="form-control" required>
                                                     @foreach([6,12,18,24] as $garansi)
-                                                        <option value="{{ $garansi }}">{{ $garansi }} Bulan</option>
+                                                        <option value="{{ $garansi }}"
+                                                            {{ $product->masa_garansi == $garansi ? 'selected' : '' }}>
+                                                            {{ $garansi }} Bulan
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>Resolusi Kamera</label>
                                                 <select name="resolusi_kamera" class="form-control" required>
                                                     @foreach(['12 MP','48 MP','50 MP','64 MP','108 MP'] as $kamera)
-                                                        <option value="{{ $kamera }}">{{ $kamera }}</option>
+                                                        <option value="{{ $kamera }}"
+                                                            {{ $product->resolusi_kamera == $kamera ? 'selected' : '' }}>
+                                                            {{ $kamera }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-
                                             <div class="col-md-6 mb-2">
                                                 <label>Jumlah Slot SIM</label>
                                                 <select name="jumlah_slot_sim" class="form-control" required>
-                                                    <option value="1">1 SIM</option>
-                                                    <option value="2">2 SIM</option>
+                                                    <option value="1" {{ $product->jumlah_slot_sim == 1 ? 'selected' : '' }}>1 SIM</option>
+                                                    <option value="2" {{ $product->jumlah_slot_sim == 2 ? 'selected' : '' }}>2 SIM</option>
                                                 </select>
                                             </div>
                                         </div>

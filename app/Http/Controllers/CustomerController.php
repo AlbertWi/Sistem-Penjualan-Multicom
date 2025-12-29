@@ -21,33 +21,51 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:191',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+        $validated = $request->validate([
+            'name'           => 'required|string|max:191',
+            'phone'          => 'nullable|string|max:20',
+            'jenis_kelamin'  => 'nullable|in:L,P',
+            'tanggal_lahir'  => 'nullable|date',
+            'email'          => 'nullable|email|unique:customers,email',
+            'password'       => 'nullable|min:6',
         ]);
 
-        Customer::create($request->all());
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        }
 
-        return redirect()->route('customers.index')->with('success', 'Customer berhasil ditambahkan.');
+        Customer::create($validated);
+
+        return redirect()
+            ->route('manajer_operasional.customers.index')
+            ->with('success', 'Customer berhasil ditambahkan.');
     }
-
     public function edit(Customer $customer)
     {
         return view('manajer_operasional.customers.edit', compact('customer'));
     }
-
     public function update(Request $request, Customer $customer)
     {
-        $request->validate([
-            'name' => 'required|string|max:191',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+        $validated = $request->validate([
+            'name'           => 'required|string|max:191',
+            'phone'          => 'nullable|string|max:20',
+            'jenis_kelamin'  => 'nullable|in:pria,wanita',
+            'tanggal_lahir'  => 'nullable|date',
+            'email'          => 'nullable|email|unique:customers,email,' . $customer->id,
+            'password'       => 'nullable|min:6',
         ]);
 
-        $customer->update($request->all());
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
-        return redirect()->route('customers.index')->with('success', 'Customer berhasil diperbarui.');
+        $customer->update($validated);
+
+        return redirect()
+            ->route('manajer_operasional.customers.index')
+            ->with('success', 'Customer berhasil diperbarui.');
     }
 
     public function destroy(Customer $customer)
