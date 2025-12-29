@@ -6,6 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Brand;
 use App\Models\Type;
+use App\Models\ProductImage;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -31,22 +32,34 @@ class ProductController extends Controller
             'brand_id' => 'required|string|max:255',
             'type_id' => 'required|exists:types,id',
             'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-            'specification' => 'required|string|max:10000',
+            'ram' => 'required|integer',
+            'rom' => 'required|integer',
+            'baterai' => 'required|integer',
+            'ukuran_layar' => 'required|numeric',
+            'masa_garansi' => 'required|integer',
+            'resolusi_kamera' => 'required|string',
+            'jumlah_slot_sim' => 'required|integer|in:1,2',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
             'brand_id.required' => 'Brand harus diisi.',
             'type_id.required' => 'Type harus diisi.',
         ]);
+        
+        // ✅ Simpan hasil create ke variabel $product
+        $product = Product::create($validated);
+        
+        // ✅ Sekarang $product sudah ada
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $file) {
                 $path = $file->store('products', 'public');
-                \App\Models\ProductImage::create([
+
+                ProductImage::create([
                     'product_id' => $product->id,
                     'file_path'  => $path,
                 ]);
             }
         }
-        Product::create($validated);
+        
         return redirect()->route('manajer_operasional.products.index')
             ->with('success', 'Product Berhasil Ditambah');
     }

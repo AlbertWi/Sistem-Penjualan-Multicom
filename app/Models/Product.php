@@ -9,7 +9,18 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','brand_id','type_id','foto','specification'];
+    protected $fillable = [
+    'name',
+    'brand_id',
+    'type_id',
+    'ram',
+    'rom',
+    'baterai',
+    'ukuran_layar',
+    'masa_garansi',
+    'resolusi_kamera',
+    'jumlah_slot_sim',
+    ];
 
     public function inventoryItems() {
         return $this->hasMany(InventoryItem::class);

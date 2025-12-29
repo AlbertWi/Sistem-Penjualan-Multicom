@@ -33,7 +33,7 @@ class ManagerProductController extends Controller
             'ecom_price' => $request->ecom_price
         ]);
 
-        return redirect()->route('inventory.for_ecom')->with('success','Harga tersimpan.');
+        return redirect()->route('manajer_operasional.inventory.for_ecom')->with('success','Harga tersimpan.');
     }
 
     public function postToCatalog(InventoryItem $inventoryItem)

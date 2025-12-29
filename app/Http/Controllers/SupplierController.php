@@ -26,7 +26,7 @@ class SupplierController extends Controller
         'phone.digits_between' => 'No.telepon harus diisi dengan 8-15 Angka.',
     ]);
         Supplier::create($validated);
-        return redirect()->route('suppliers.index')->with('success', 'Supplier berhasil ditambahkan.');
+        return redirect()->route('manajer_operasional.suppliers.index')->with('success', 'Supplier berhasil ditambahkan.');
     }
     public function update(Request $request, $id)
     {
@@ -45,6 +45,6 @@ class SupplierController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
-        return redirect()->route('suppliers.index')->with('success', 'Supplier berhasil diperbarui.');
+        return redirect()->route('manajer_operasional.suppliers.index')->with('success', 'Supplier berhasil diperbarui.');
     }
 }

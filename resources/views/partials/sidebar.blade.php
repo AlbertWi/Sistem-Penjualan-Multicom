@@ -92,12 +92,6 @@
               </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('report.stock-summary') }}" class="nav-link">
-                    <i class="nav-icon fas fa-boxes"></i>
-                    <p>Rekap Stok Produk</p>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a href="{{ route('manajer_operasional.inventory.for_ecom') }}" class="nav-link">
                     <i class="nav-icon fas fa-shopping-cart"></i>
                     <p>Produk E-Commerce</p>
@@ -127,12 +121,6 @@
                 <i class="nav-icon fas fa-warehouse"></i>
                 <p>Stok Cabang</p>
               </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('report.stock-summary') }}" class="nav-link">
-                    <i class="nav-icon fas fa-boxes"></i>
-                    <p>CEK STOK</p>
-                </a>
             </li>
           @elseif(Auth::check() && Auth::user()->role === 'owner')
             <li class="nav-item">
