@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="catalog-wrapper">
+
     {{-- Hero Section --}}
     <section class="catalog-hero">
         <div class="container">
@@ -18,7 +19,7 @@
         <div class="container">
             <div class="filter-content">
                 <div class="result-count">
-                    Showing {{ $items->count() }} of {{ $items->total() }} products
+                    Showing {{ $products->count() }} of {{ $products->total() }} products
                 </div>
                 <select class="filter-select">
                     <option>Sort by: Featured</option>
@@ -33,25 +34,32 @@
     {{-- Product Grid --}}
     <section class="container">
         <div class="product-grid">
-            @forelse($items as $item)
+
+            @forelse($products as $product)
             <div class="product-card">
+
+                {{-- Image --}}
                 <div class="product-image-wrapper">
                     <span class="product-badge">NEW</span>
+
                     @php
-                        $image = $item->product->images->first();
+                        $image = $product->images->first();
                     @endphp
+
                     @if($image)
                         <img src="{{ asset('storage/' . $image->file_path) }}"
-                            class="product-image"
-                            alt="{{ $item->product->name }}">
+                             class="product-image"
+                             alt="{{ $product->name }}">
                     @else
                         <img src="https://via.placeholder.com/400"
-                            class="product-image"
-                            alt="{{ $item->product->name }}">
+                             class="product-image"
+                             alt="{{ $product->name }}">
                     @endif
+
                     <div class="product-overlay">
-                        <a href="{{ route('catalog.show', $item) }}" class="quick-view-btn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <a href="{{ route('catalog.show', $product) }}" class="quick-view-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                 <circle cx="12" cy="12" r="3"/>
                             </svg>
@@ -59,33 +67,56 @@
                         </a>
                     </div>
                 </div>
+
+                {{-- Info --}}
                 <div class="product-info">
-                    <h3 class="product-name">{{ $item->product->name }}</h3>
+                    <h3 class="product-name">{{ $product->name }}</h3>
+
+                    {{-- Rating dummy --}}
                     <div class="product-rating">
                         <div class="stars">
                             @for($i = 1; $i <= 5; $i++)
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="{{ $i <= 4 ? '#ffc107' : 'none' }}" stroke="{{ $i <= 4 ? '#ffc107' : '#e0e0e0' }}" stroke-width="2" class="{{ $i <= 4 ? 'star-filled' : 'star-empty' }}">
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                <svg width="16" height="16" viewBox="0 0 24 24"
+                                     fill="{{ $i <= 4 ? '#ffc107' : 'none' }}"
+                                     stroke="{{ $i <= 4 ? '#ffc107' : '#e0e0e0' }}"
+                                     stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27
+                                                     17 14.14 18.18 21.02
+                                                     12 17.77 5.82 21.02
+                                                     7 14.14 2 9.27
+                                                     8.91 8.26 12 2"/>
                                 </svg>
                             @endfor
                         </div>
                         <span class="review-count">(24)</span>
                     </div>
+
+                    {{-- Price --}}
                     <div class="product-price-wrapper">
-                        <div class="product-price">Rp {{ number_format($item->ecom_price ?? $item->price, 0, ',', '.') }}</div>
+                        <div class="product-price">
+                            Rp {{ number_format($product->ecomSetting->ecom_price, 0, ',', '.') }}
+                        </div>
+                        <small class="text-muted">
+                            Stok tersedia: {{ $product->stock_count }}
+                        </small>
                     </div>
-                    <a href="{{ route('catalog.show', $item) }}" class="product-btn">
+
+                    {{-- Button --}}
+                    <a href="{{ route('catalog.show', $product) }}" class="product-btn">
                         View Details
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"/>
                             <polyline points="12 5 19 12 12 19"/>
                         </svg>
                     </a>
                 </div>
+
             </div>
             @empty
             <div class="empty-state">
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <svg width="120" height="120" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1">
                     <circle cx="11" cy="11" r="8"/>
                     <path d="m21 21-4.35-4.35"/>
                 </svg>
@@ -93,37 +124,16 @@
                 <p>Sorry, we couldn't find any products matching your criteria.</p>
             </div>
             @endforelse
+
         </div>
 
         {{-- Pagination --}}
-        @if($items->hasPages())
+        @if($products->hasPages())
         <div class="pagination-wrapper">
-            <ul class="pagination">
-                {{-- Previous Page Link --}}
-                @if ($items->onFirstPage())
-                    <li class="disabled"><span>&laquo;</span></li>
-                @else
-                    <li><a href="{{ $items->previousPageUrl() }}" rel="prev">&laquo;</a></li>
-                @endif
-
-                {{-- Pagination Elements --}}
-                @foreach ($items->getUrlRange(1, $items->lastPage()) as $page => $url)
-                    @if ($page == $items->currentPage())
-                        <li class="active"><span>{{ $page }}</span></li>
-                    @else
-                        <li><a href="{{ $url }}">{{ $page }}</a></li>
-                    @endif
-                @endforeach
-
-                {{-- Next Page Link --}}
-                @if ($items->hasMorePages())
-                    <li><a href="{{ $items->nextPageUrl() }}" rel="next">&raquo;</a></li>
-                @else
-                    <li class="disabled"><span>&raquo;</span></li>
-                @endif
-            </ul>
+            {{ $products->links() }}
         </div>
         @endif
     </section>
+
 </div>
 @endsection

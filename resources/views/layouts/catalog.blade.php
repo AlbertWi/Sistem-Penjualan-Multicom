@@ -1282,14 +1282,19 @@
     <header class="site-header">
         <div class="header-top">
             <div class="container">
-                <div class="header-top-text">Gratis ongkir untuk pembelian di atas Rp 200.000</div>
                 <div class="header-top-links">
                     <a href="#">Bantuan</a>
-                    <a href="#">Lacak Pesanan</a>
                     @auth
                         <a href="#">{{ Auth::user()->name }}</a>
+                        <a href="{{ route('logout') }}"
+                        onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                            Logout
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
                     @else
-                        <a href="{{ route('ecom.login') }}">Masuk/Daftar</a>
+                        <a href="{{ route('ecom.login') }}">Masuk / Daftar</a>
                     @endauth
                 </div>
             </div>
@@ -1298,52 +1303,64 @@
             <div class="container">
                 <a href="{{ route('catalog.index') }}" class="logo">
                     <i class="fas fa-shopping-bag"></i>
-                    <span>{{ config('app.name', 'ShopOnline') }}</span>
+                    <span>{{ config('app.name') }}</span>
                 </a>
-                <div class="search-box">
-                    <input type="text" placeholder="Cari produk, kategori, atau merek...">
-                    <button><i class="fas fa-search"></i></button>
-                </div>
+                <form method="GET"
+                    action="{{ route('catalog.index') }}"
+                    class="search-box">
+                    <input type="text"
+                        name="q"
+                        placeholder="Cari produk atau brand..."
+                        value="{{ request('q') }}">
+                    <button type="submit">
+                        <i class="fass fa-search"></i>
+                    </button>
+                </form>
                 <div class="header-icons">
-                    @auth
-                        <a href="profile">
+                    @if(auth('customer')->check())
+                        <a href="{{ route('ecom.profile') }}">
                             <i class="far fa-user"></i>
+                            {{ auth('customer')->user()->name }}
                         </a>
+
+                        <a href="{{ route('ecom.logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            Logout
+                        </a>
+
+                        <form id="logout-form"
+                            action="{{ route('ecom.logout') }}"
+                            method="POST"
+                            class="d-none">
+                            @csrf
+                        </form>
                     @else
-                        <a href="{{ route('ecom.login') }}">
-                            <i class="far fa-user"></i>
-                        </a>
-                    @endauth
-                    <a href="#">
-                        <i class="far fa-heart"></i>
-                    </a>
-                    <a href="#">
+                        <a href="{{ route('ecom.login') }}">Masuk / Daftar</a>
+                    @endif
+                <div class="header-icons">
+                    <a href="{{ route('cart.index') }}">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">3</span>
+                        @php
+                            $cartCount = collect(session('cart', []))->sum('qty');
+                        @endphp
+                        @if($cartCount > 0)
+                            <span class="cart-count">{{ $cartCount }}</span>
+                        @endif
                     </a>
                 </div>
             </div>
         </div>
-        <nav class="site-nav">
+            <nav class="site-nav">
             <div class="container navbar">
                 <button class="mobile-menu-btn">
                     <i class="fas fa-bars"></i>
                 </button>
                 <ul class="nav-links">
-                    <li><a href="{{ route('catalog.index') }}"><i class="fas fa-home"></i> Beranda</a></li>
-                    <li class="dropdown">
-                        <a href="#"><i class="fas fa-th-large"></i> Kategori <i class="fas fa-chevron-down"></i></a>
-                        <div class="dropdown-menu">
-                            <a href="#">Elektronik</a>
-                            <a href="#">Fashion</a>
-                            <a href="#">Kesehatan & Kecantikan</a>
-                            <a href="#">Rumah Tangga</a>
-                            <a href="#">Olahraga & Hobi</a>
-                        </div>
+                    <li>
+                        <a href="{{ route('catalog.index') }}">
+                            <i class="fas fa-home"></i> Beranda
+                        </a>
                     </li>
-                    <li><a href="#"><i class="fas fa-fire"></i> Terlaris</a></li>
-                    <li><a href="#"><i class="fas fa-percent"></i> Promo</a></li>
-                    <li><a href="#"><i class="fas fa-headset"></i> Bantuan</a></li>
                 </ul>
             </div>
         </nav>

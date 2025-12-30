@@ -18,7 +18,12 @@ class EcomAuthController extends Controller
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
+        ],[
+            'email.required' => 'Email harus diisi.',
+            'email.email' => 'Format email tidak valid. Contoh: user@example.com',
+            'password.required' => 'Password Harus diisi',
         ]);
+        
 
         if (Auth::guard('customer')->attempt($credentials)) {
             $request->session()->regenerate();
@@ -26,8 +31,8 @@ class EcomAuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah',
-        ]);
+            'email' => 'Email atau password salah.'
+        ])->withInput();
     }
 
     public function showRegister()

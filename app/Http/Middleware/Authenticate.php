@@ -6,15 +6,21 @@ use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class Authenticate extends Middleware
 {
-    /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return string|null
-     */
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
+
+            // ===== E-COMMERCE (CUSTOMER) =====
+            if (
+                $request->is('ecom*') ||
+                $request->is('cart*') ||
+                $request->is('profile*') ||
+                $request->is('checkout*')
+            ) {
+                return route('ecom.login');
+            }
+
+            // ===== DEFAULT (PEGAWAI / OFFLINE) =====
             return route('login');
         }
     }

@@ -1,70 +1,56 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\InventoryItem;
+use App\Models\Product;
+use App\Models\ProductEcomSetting;
 use Illuminate\Http\Request;
 
 class ManagerProductController extends Controller
 {
-    public function index(Request $request) // ← TAMBAHKAN Request $request
+    public function index(Request $request)
     {
-        $q = $request->input('q');
+        $q = $request->q;
 
-        $items = InventoryItem::with(['product.brand'])
-            ->where('status', 'in_stock') // Filter hanya yang in_stock
+        $products = Product::with(['brand', 'ecomSetting'])
+            ->whereHas('inventoryItems', function ($q2) {
+                $q2->where('status', 'in_stock');
+            })
             ->when($q, function ($query) use ($q) {
-                return $query->where(function($subQuery) use ($q) {
-                    $subQuery->where('imei', 'like', "%{$q}%")
-                        ->orWhereHas('product', function ($p) use ($q) {
-                            $p->where('name', 'like', "%{$q}%");
-                        })
-                        ->orWhereHas('product.brand', function ($b) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhereHas('brand', function ($b) use ($q) {
                             $b->where('name', 'like', "%{$q}%");
                         });
                 });
             })
+            ->withCount([
+                'inventoryItems as stock_count' => function ($q) {
+                    $q->where('status', 'in_stock');
+                }
+            ])
             ->latest()
             ->paginate(30)
             ->appends(['q' => $q]);
 
-        return view('manajer_operasional.inventory.for_ecom', compact('items'));
+        return view('manajer_operasional.inventory.for_ecom', compact('products'));
     }
 
-    public function editPrice(InventoryItem $inventoryItem)
-    {
-        $this->authorize('update', $inventoryItem); // optional policy
-        return view('manajer_operasional.inventory.edit_price', compact('inventoryItem'));
-    }
-
-    public function updatePrice(Request $request, InventoryItem $inventoryItem)
+    public function update(Request $request, Product $product)
     {
         $request->validate([
-            'ecom_price' => 'required|numeric|min:0'
+            'ecom_price' => 'required|numeric|min:0',
+            'is_listed'  => 'nullable|boolean',
         ]);
 
-        $inventoryItem->update([
-            'ecom_price' => $request->ecom_price
-        ]);
+        ProductEcomSetting::updateOrCreate(
+            ['product_id' => $product->id],
+            [
+                'ecom_price' => $request->ecom_price,
+                'is_listed'  => $request->boolean('is_listed'),
+            ]
+        );
 
-        return redirect()->route('manajer_operasional.inventory.for_ecom')->with('success','Harga tersimpan.');
-    }
-
-    public function postToCatalog(InventoryItem $inventoryItem)
-    {
-        if (! $inventoryItem->ecom_price) {
-            return back()->with('error', 'Masukkan harga dulu sebelum di-post.');
-        }
-        $inventoryItem->update([
-            'is_listed' => true,
-            'listed_at' => now(),
-        ]);
-        return back()->with('success','Item berhasil diposting ke katalog.');
-    }
-
-    public function unpostFromCatalog(InventoryItem $inventoryItem)
-    {
-        $inventoryItem->update(['is_listed' => false, 'listed_at' => null]);
-        return back()->with('success','Item dihapus dari katalog.');
+        return back()->with('success', 'Setting e-commerce tersimpan.');
     }
 }
-

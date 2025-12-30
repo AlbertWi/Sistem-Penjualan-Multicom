@@ -25,31 +25,31 @@ use App\Http\Controllers\{
     CustomerController,
     InventoryItemController,
     ManagerProductController,
-    StockRequestController
+    StockRequestController,
+    ProductEcomController,
 };
 Route::get('/ajax/types-by-brand/{brand_id}', function($brand_id) {
     return \App\Models\Type::where('brand_id', $brand_id)->get();
 });
 // Catalog
 Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
-Route::get('/product/{inventoryItem}', [CatalogController::class, 'show'])->name('catalog.show');
+Route::get('/catalog/{product}', [CatalogController::class, 'show'])->name('catalog.show');
 
-// Authentication - Admin
+
+// Authentication 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:sanctum');
-
-// Authentication - E-commerce
-Route::prefix('ecom')->name('ecom.')->group(function () {
-    Route::get('/login', [EcomAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [EcomAuthController::class, 'login']);
-    Route::get('/register', [EcomAuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [EcomAuthController::class, 'register']);
-    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('logout');
-});
+Route::get('/login', [EcomAuthController::class, 'showLogin'])->name('ecom.login');
+Route::post('/login', [EcomAuthController::class, 'login']);
+Route::get('/register', [EcomAuthController::class, 'showRegister'])->name('ecom.register');
+Route::post('/register', [EcomAuthController::class, 'register']);
 
 Route::middleware('auth:customer')->group(function () {
-    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('ecom.logout');
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/checkout', [CheckoutController::class, 'store']);
     Route::get('/profile', [EcomAuthController::class, 'profile'])->name('ecom.profile');
     Route::post('/profile/update', [EcomAuthController::class, 'profileUpdate'])->name('ecom.profile.update');
@@ -134,10 +134,13 @@ Route::middleware('auth')->group(function () {
         
         // E-commerce Management
         Route::get('/inventory/for-ecom', [ManagerProductController::class, 'index'])->name('inventory.for_ecom');
+        Route::post('inventory/for-ecom/{product}', [ManagerProductController::class, 'update'])->name('inventory_ecom.update');
         Route::get('/inventory/{inventoryItem}/edit-price', [ManagerProductController::class, 'editPrice'])->name('inventory.edit_price');
         Route::post('/inventory/{inventoryItem}/update-price', [ManagerProductController::class, 'updatePrice'])->name('inventory.update_price');
         Route::post('/inventory/{inventoryItem}/post', [ManagerProductController::class, 'postToCatalog'])->name('inventory.post');
         Route::post('/inventory/{inventoryItem}/unpost', [ManagerProductController::class, 'unpostFromCatalog'])->name('inventory.unpost');
+        Route::get('product/for-ecom',[ProductForEcomController::class, 'index'])->name('product_ecom.index');
+        Route::post('product/for-ecom/{product}',[ProductEcomController::class, 'update'])->name('product_ecom.update');
     });
 
 

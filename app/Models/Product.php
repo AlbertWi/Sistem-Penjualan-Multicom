@@ -41,5 +41,9 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+    public function ecomSetting()
+    {
+        return $this->hasOne(ProductEcomSetting::class);
+    }
 
 }
