@@ -497,14 +497,14 @@ class SaleController extends Controller
     {
         $imei = $request->imei;
         $results = collect();
-    
+
         // 1. Cari di PEMBELIAN (purchase_items)
-        // Ambil dari inventory_items yang terkait dengan purchase_item_id
+        // Gunakan LIKE untuk pencarian partial
         $purchaseInventory = InventoryItem::with(['product', 'branch', 'purchaseItem.purchase'])
-            ->where('imei', $imei)
+            ->where('imei', 'like', "%{$imei}%")
             ->whereNotNull('purchase_item_id')
             ->get();
-    
+
         foreach ($purchaseInventory as $inv) {
             if ($inv->purchaseItem && $inv->purchaseItem->purchase) {
                 $results->push((object)[
@@ -517,12 +517,13 @@ class SaleController extends Controller
                 ]);
             }
         }
-    
+
         // 2. Cari di PENJUALAN (sale_items)
+        // Gunakan LIKE untuk pencarian partial
         $sales = SaleItem::with(['sale', 'product', 'sale.branch'])
-            ->where('imei', $imei)
+            ->where('imei', 'like', "%{$imei}%")
             ->get();
-    
+
         foreach ($sales as $s) {
             $results->push((object)[
                 'imei'      => $s->imei,
@@ -533,18 +534,19 @@ class SaleController extends Controller
                 'date'      => $s->sale->created_at,
             ]);
         }
-    
+
         // 3. Cari di TRANSFER STOCK (stock_transfer_items)
+        // Gunakan LIKE untuk pencarian partial di whereHas
         $transferItems = StockTransferItem::with([
                 'inventoryItem.product',
                 'stockTransfer.fromBranch',
                 'stockTransfer.toBranch'
             ])
             ->whereHas('inventoryItem', function ($q) use ($imei) {
-                $q->where('imei', $imei);
+                $q->where('imei', 'like', "%{$imei}%");
             })
             ->get();
-    
+
         foreach ($transferItems as $t) {
             $results->push((object)[
                 'imei'      => $t->inventoryItem->imei,
@@ -555,10 +557,10 @@ class SaleController extends Controller
                 'date'      => $t->stockTransfer->created_at,
             ]);
         }
-    
+
         // Sort berdasarkan tanggal (terbaru di atas)
         $results = $results->sortByDesc('date')->values();
-    
+
         return view('kepala_toko.sales.find-imei-result', compact('results'));
     }
 
