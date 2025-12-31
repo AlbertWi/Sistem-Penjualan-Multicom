@@ -131,24 +131,74 @@
 
                         </div>
                     </div>
-
-
                 {{-- Actions --}}
                 <div class="product-actions">
-                    <div class="quantity-selector">
-                        <button class="qty-btn" type="button" onclick="decreaseQty()">−</button>
-                        <input type="number" class="qty-input" value="1" min="1" max="{{ $stock }}" id="quantity">
-                        <button class="qty-btn" type="button" onclick="increaseQty()">+</button>
-                    </div>
-
-                    <form action="{{ route('cart.add', $product) }}"  method="POST">
-                        @csrf
-                        <input type="hidden" name="qty" id="qtyInput">
-                        <button class="btn-add-cart">
-                            Add to Cart
-                        </button>
-                    </form>
+                    @auth('customer')
+                        {{-- Tampilkan error/success messages --}}
+                        @if(session('error'))
+                            <div class="alert alert-danger mb-3">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+                        
+                        @if(session('success'))
+                            <div class="alert alert-success mb-3">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+                        
+                        <form action="{{ route('cart.add') }}" method="POST" id="addToCartForm">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="qty" id="qtyInput" value="1">
+                            
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <div class="quantity-selector">
+                                    <button class="qty-btn" type="button" onclick="decreaseQty()">−</button>
+                                    <input
+                                        type="number"
+                                        class="qty-input"
+                                        value="1"
+                                        min="1"
+                                        max="{{ $stock }}"
+                                        id="quantity"
+                                        onchange="syncQty()"
+                                    >
+                                    <button class="qty-btn" type="button" onclick="increaseQty()">+</button>
+                                </div>
+                                
+                                <button type="submit" class="btn-add-cart" id="submitBtn">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </form>
+                    @else
+                        {{-- Untuk guest --}}
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <div class="quantity-selector" style="opacity: 0.5;">
+                                <button class="qty-btn" type="button" disabled>−</button>
+                                <input
+                                    type="number"
+                                    class="qty-input"
+                                    value="1"
+                                    disabled
+                                >
+                                <button class="qty-btn" type="button" disabled>+</button>
+                            </div>
+                            
+                            <a href="{{ route('ecom.login') }}" class="btn-add-cart">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Login untuk Belanja
+                            </a>
+                        </div>
+                        
+                        <p class="text-muted small mt-2">
+                            <a href="{{ route('ecom.register') }}">Daftar akun</a> untuk mulai berbelanja
+                        </p>
+                    @endauth
                 </div>
+
 
             </div>
         </div>
@@ -172,30 +222,100 @@
 
 @push('scripts')
 <script>
-function increaseQty() {
-    const input = document.getElementById('quantity');
-    const max = parseInt(input.max);
-    if (parseInt(input.value) < max) {
-        input.value++;
+// Pastikan fungsi global untuk menghindari conflict
+window.increaseQty = function() {
+    console.log('increaseQty called');
+    let qty = document.getElementById('quantity');
+    let max = parseInt(qty.getAttribute('max'));
+    
+    if (parseInt(qty.value) < max) {
+        qty.value = parseInt(qty.value) + 1;
+        window.syncQty();
     }
-    syncQty();
 }
 
-function decreaseQty() {
-    const input = document.getElementById('quantity');
-    if (parseInt(input.value) > 1) {
-        input.value--;
+window.decreaseQty = function() {
+    console.log('decreaseQty called');
+    let qty = document.getElementById('quantity');
+    
+    if (parseInt(qty.value) > 1) {
+        qty.value = parseInt(qty.value) - 1;
+        window.syncQty();
     }
-    syncQty();
 }
 
-function syncQty() {
-    document.getElementById('qtyInput').value =
-        document.getElementById('quantity').value;
+window.syncQty = function() {
+    const qtyValue = document.getElementById('quantity').value;
+    document.getElementById('qtyInput').value = qtyValue;
+    console.log('Quantity synced to hidden input:', qtyValue);
 }
 
-// initial
-syncQty();
+// Form submit handler dengan lebih robust
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Product detail page loaded');
+    
+    const form = document.getElementById('addToCartForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (!form) {
+        console.error('Form not found! Check if user is logged in.');
+        return;
+    }
+    
+    console.log('Form found:', form);
+    console.log('Submit button:', submitBtn);
+    
+    // Sync quantity awal
+    window.syncQty();
+    
+    // Handle form submit
+    form.addEventListener('submit', function(e) {
+        console.log('=== FORM SUBMIT TRIGGERED ===');
+        console.log('Action:', this.action);
+        console.log('Method:', this.method);
+        console.log('Product ID:', this.querySelector('[name="product_id"]').value);
+        console.log('Quantity:', this.querySelector('[name="qty"]').value);
+        console.log('CSRF Token exists:', !!this.querySelector('[name="_token"]'));
+        
+        // Tampilkan loading state
+        if (submitBtn) {
+            const originalHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            submitBtn.disabled = true;
+            
+            // Restore setelah 3 detik (fallback jika redirect gagal)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalHtml;
+                submitBtn.disabled = false;
+            }, 3000);
+        }
+        
+        // Biarkan form submit normal
+        // Tidak ada e.preventDefault()
+    });
+    
+    // Tambahkan juga click handler untuk button
+    if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+            console.log('Submit button clicked directly');
+            console.log('Button type:', this.type);
+        });
+    }
+    
+    // Quantity input listeners
+    const qtyInput = document.getElementById('quantity');
+    if (qtyInput) {
+        qtyInput.addEventListener('input', window.syncQty);
+        qtyInput.addEventListener('change', window.syncQty);
+    }
+    
+    // Quantity buttons
+    const qtyButtons = document.querySelectorAll('.qty-btn');
+    qtyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            console.log('Qty button clicked:', this.textContent);
+        });
+    });
+});
 </script>
 @endpush
-

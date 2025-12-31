@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name'))</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -1286,11 +1288,11 @@
                     <a href="#">Bantuan</a>
                     @auth
                         <a href="#">{{ Auth::user()->name }}</a>
-                        <a href="{{ route('logout') }}"
+                        <a href="{{ route('ecom.logout') }}"
                         onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                             Logout
                         </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        <form id="logout-form" action="{{ route('ecom.logout') }}" method="POST" class="d-none">
                             @csrf
                         </form>
                     @else
@@ -1337,8 +1339,9 @@
                     @else
                         <a href="{{ route('ecom.login') }}">Masuk / Daftar</a>
                     @endif
-                <div class="header-icons">
-                    <a href="{{ route('cart.index') }}">
+
+                    <!-- Cart icon di luar conditional -->
+                    <a href="{{ route('cart.index') }}" style="margin-left: 20px;">
                         <i class="fas fa-shopping-cart"></i>
                         @php
                             $cartCount = collect(session('cart', []))->sum('qty');
@@ -1389,31 +1392,6 @@
             }
         });
 
-        // Simple cart counter
-        let cartButtons = document.querySelectorAll('.btn-add-cart, .add-to-cart');
-        let cartCount = document.querySelector('.cart-count');
-        let count = 3;
-
-        cartButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                count++;
-                if (cartCount) {
-                    cartCount.textContent = count;
-                }
-                
-                // Add animation effect
-                const originalText = this.textContent;
-                this.textContent = "Ditambahkan!";
-                this.style.backgroundColor = "#2ecc71";
-                
-                setTimeout(() => {
-                    this.textContent = originalText;
-                    this.style.backgroundColor = "";
-                }, 1000);
-            });
-        });
-
         // Newsletter form submission
         document.querySelector('.newsletter-form')?.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1448,21 +1426,6 @@
                 });
             }
         });
-
-        // Quantity Controls (if exists on page)
-        function increaseQty() {
-            const input = document.getElementById('quantity');
-            if (input) {
-                input.value = parseInt(input.value) + 1;
-            }
-        }
-
-        function decreaseQty() {
-            const input = document.getElementById('quantity');
-            if (input && parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
-            }
-        }
     </script>
     
     @stack('scripts')

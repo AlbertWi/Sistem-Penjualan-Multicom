@@ -31,10 +31,53 @@ use App\Http\Controllers\{
 Route::get('/ajax/types-by-brand/{brand_id}', function($brand_id) {
     return \App\Models\Type::where('brand_id', $brand_id)->get();
 });
+
+
+Route::get('/debug/cart', function() {
+    if (!auth()->guard('customer')->check()) {
+        return 'NOT LOGGED IN as customer';
+    }
+    
+    $data = [
+        'session_id' => session()->getId(),
+        'cart_session' => session()->get('cart', []),
+        'customer_id' => auth()->guard('customer')->id(),
+        'customer_name' => auth()->guard('customer')->user()->name ?? 'No name',
+        'all_session' => session()->all(),
+    ];
+    
+    return response()->json($data);
+});
+
+Route::get('/debug/set-test', function() {
+    session()->put('test_key', 'test_value_' . time());
+    session()->save();
+    
+    return response()->json([
+        'test_key_set' => session()->get('test_key'),
+        'session_id' => session()->getId(),
+    ]);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Catalog
 Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/catalog/{product}', [CatalogController::class, 'show'])->name('catalog.show');
-
 
 // Authentication 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -45,14 +88,29 @@ Route::post('/login', [EcomAuthController::class, 'login']);
 Route::get('/register', [EcomAuthController::class, 'showRegister'])->name('ecom.register');
 Route::post('/register', [EcomAuthController::class, 'register']);
 
+
 Route::middleware('auth:customer')->group(function () {
-    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('ecom.logout');
-    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    // Cart routes
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/remove/{productId}', [CartController::class, 'remove'])->name('cart.remove');
+    
+    // Checkout routes
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'show'])->name('checkout.success');
+    Route::get('/orders', [CheckoutController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
+    
+    // Profile routes
     Route::get('/profile', [EcomAuthController::class, 'profile'])->name('ecom.profile');
     Route::post('/profile/update', [EcomAuthController::class, 'profileUpdate'])->name('ecom.profile.update');
+    Route::post('/logout', [EcomAuthController::class, 'logout'])->name('ecom.logout');
+
+    // Orders routes
+    Route::get('/orders', [CheckoutController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{order}/payment', [CheckoutController::class, 'payment'])->name('orders.payment');
+    Route::put('/orders/{order}/cancel', [CheckoutController::class, 'cancel'])->name('orders.cancel');
 });
 
 
