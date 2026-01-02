@@ -16,7 +16,7 @@
             <div class="dropdown-menu dropdown-menu-end">
                 <span class="dropdown-item disabled">Role: {{ Auth::user()->role }}</span>
                 <div class="dropdown-divider"></div>
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout.admin') }}">
                     @csrf
                     <button type="submit" class="dropdown-item text-danger">
                         <i class="fas fa-sign-out-alt me-1"></i> Logout

@@ -17,11 +17,11 @@ class Authenticate extends Middleware
                 $request->is('profile*') ||
                 $request->is('checkout*')
             ) {
-                return route('ecom.login');
+                return route('customer.login');
             }
 
             // ===== DEFAULT (PEGAWAI / OFFLINE) =====
-            return route('login');
+            return route('login.admin');
         }
     }
 }

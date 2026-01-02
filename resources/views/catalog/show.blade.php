@@ -76,78 +76,81 @@
                         Stok tersedia: {{ $stock }}
                     </small>
                 </div>
+                
                 {{-- Specifications --}}
-                    <div class="product-specs">
-                        <h3 class="section-title">Specifications</h3>
+                <div class="product-specs">
+                    <h3 class="section-title">Specifications</h3>
 
-                        <div class="specs-grid">
-
-                            <div class="spec-item">
-                                <span class="spec-label">Brand</span>
-                                <span class="spec-value">{{ $product->brand->name ?? '-' }}</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">RAM</span>
-                                <span class="spec-value">{{ $product->ram }} GB</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Storage</span>
-                                <span class="spec-value">{{ $product->rom }} GB</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Battery</span>
-                                <span class="spec-value">{{ $product->baterai }} mAh</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Screen Size</span>
-                                <span class="spec-value">{{ $product->ukuran_layar }} inch</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Camera</span>
-                                <span class="spec-value">{{ $product->resolusi_kamera }} MP</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">SIM Slot</span>
-                                <span class="spec-value">{{ $product->jumlah_slot_sim }} Slot</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Warranty</span>
-                                <span class="spec-value">{{ $product->masa_garansi }} Bulan</span>
-                            </div>
-
-                            <div class="spec-item">
-                                <span class="spec-label">Availability</span>
-                                <span class="spec-value stock-available">
-                                    In Stock
-                                </span>
-                            </div>
-
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Brand</span>
+                            <span class="spec-value">{{ $product->brand->name ?? '-' }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">RAM</span>
+                            <span class="spec-value">{{ $product->ram }} GB</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Storage</span>
+                            <span class="spec-value">{{ $product->rom }} GB</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Battery</span>
+                            <span class="spec-value">{{ $product->baterai }} mAh</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Screen Size</span>
+                            <span class="spec-value">{{ $product->ukuran_layar }} inch</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Camera</span>
+                            <span class="spec-value">{{ $product->resolusi_kamera }} MP</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">SIM Slot</span>
+                            <span class="spec-value">{{ $product->jumlah_slot_sim }} Slot</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Warranty</span>
+                            <span class="spec-value">{{ $product->masa_garansi }} Bulan</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Availability</span>
+                            <span class="spec-value stock-available">
+                                In Stock
+                            </span>
                         </div>
                     </div>
+                </div>
+                
                 {{-- Actions --}}
                 <div class="product-actions">
                     @auth('customer')
-                        {{-- Tampilkan error/success messages --}}
-                        @if(session('error'))
-                            <div class="alert alert-danger mb-3">
-                                {{ session('error') }}
+                        {{-- Notification Toast --}}
+                        <div id="cartNotification" class="toast align-items-center text-white bg-success border-0 position-fixed top-50 start-50 translate-middle" 
+                             role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999; display: none;">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span id="notificationMessage">Produk ditambahkan ke keranjang!</span>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                             </div>
-                        @endif
-                        
-                        @if(session('success'))
-                            <div class="alert alert-success mb-3">
-                                {{ session('success') }}
+                        </div>
+
+                        {{-- Error Toast --}}
+                        <div id="errorNotification" class="toast align-items-center text-white bg-danger border-0 position-fixed top-50 start-50 translate-middle" 
+                             role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 9999; display: none;">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <span id="errorMessage">Terjadi kesalahan!</span>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                             </div>
-                        @endif
-                        
-                        <form action="{{ route('cart.add') }}" method="POST" id="addToCartForm">
+                        </div>
+
+                        <form id="addToCartForm">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="hidden" name="qty" id="qtyInput" value="1">
@@ -167,9 +170,9 @@
                                     <button class="qty-btn" type="button" onclick="increaseQty()">+</button>
                                 </div>
                                 
-                                <button type="submit" class="btn-add-cart" id="submitBtn">
+                                <button type="button" class="btn-add-cart" id="submitBtn">
                                     <i class="fas fa-shopping-cart"></i>
-                                    Add to Cart
+                                    <span id="btnText">Add to Cart</span>
                                 </button>
                             </div>
                         </form>
@@ -187,18 +190,17 @@
                                 <button class="qty-btn" type="button" disabled>+</button>
                             </div>
                             
-                            <a href="{{ route('ecom.login') }}" class="btn-add-cart">
+                            <a href="{{ route('customer.login') }}" class="btn-add-cart">
                                 <i class="fas fa-sign-in-alt"></i>
                                 Login untuk Belanja
                             </a>
                         </div>
                         
                         <p class="text-muted small mt-2">
-                            <a href="{{ route('ecom.register') }}">Daftar akun</a> untuk mulai berbelanja
+                            <a href="{{ route('customer.register') }}">Daftar akun</a> untuk mulai berbelanja
                         </p>
                     @endauth
                 </div>
-
 
             </div>
         </div>
@@ -220,102 +222,251 @@
 </div>
 @endsection
 
+@push('styles')
+<style>
+/* Animation Styles */
+@keyframes cartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes checkmark {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes floatToCart {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translate(var(--tx), var(--ty)) scale(0.3);
+        opacity: 0;
+    }
+}
+
+.cart-animation {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background: var(--secondary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    pointer-events: none;
+    animation: floatToCart 1s ease-in-out forwards;
+}
+
+.cart-count-animate {
+    animation: cartBounce 0.5s ease-in-out 2;
+}
+
+.checkmark-animate {
+    animation: checkmark 0.5s ease-in-out;
+}
+
+/* Toast Notification */
+.toast {
+    min-width: 300px;
+}
+</style>
+@endpush
+
 @push('scripts')
 <script>
-// Pastikan fungsi global untuk menghindari conflict
-window.increaseQty = function() {
-    console.log('increaseQty called');
+// Quantity Functions
+function increaseQty() {
     let qty = document.getElementById('quantity');
     let max = parseInt(qty.getAttribute('max'));
     
     if (parseInt(qty.value) < max) {
         qty.value = parseInt(qty.value) + 1;
-        window.syncQty();
+        syncQty();
     }
 }
 
-window.decreaseQty = function() {
-    console.log('decreaseQty called');
+function decreaseQty() {
     let qty = document.getElementById('quantity');
     
     if (parseInt(qty.value) > 1) {
         qty.value = parseInt(qty.value) - 1;
-        window.syncQty();
+        syncQty();
     }
 }
 
-window.syncQty = function() {
+function syncQty() {
     const qtyValue = document.getElementById('quantity').value;
     document.getElementById('qtyInput').value = qtyValue;
-    console.log('Quantity synced to hidden input:', qtyValue);
 }
 
-// Form submit handler dengan lebih robust
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Product detail page loaded');
+// Create floating animation element
+function createFloatingCartAnimation(startX, startY, endX, endY) {
+    const floatingElement = document.createElement('div');
+    floatingElement.className = 'cart-animation';
+    floatingElement.innerHTML = '<i class="fas fa-shopping-cart"></i>';
     
+    // Calculate animation path
+    const tx = endX - startX;
+    const ty = endY - startY;
+    floatingElement.style.setProperty('--tx', `${tx}px`);
+    floatingElement.style.setProperty('--ty', `${ty}px`);
+    
+    // Position at start
+    floatingElement.style.left = `${startX}px`;
+    floatingElement.style.top = `${startY}px`;
+    
+    document.body.appendChild(floatingElement);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+        floatingElement.remove();
+    }, 1000);
+    
+    return floatingElement;
+}
+
+// Update cart count in header
+function updateCartCount(count) {
+    const cartCountElement = document.querySelector('.cart-count');
+    const cartIcon = document.querySelector('.header-icons a[href*="cart"]');
+    
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+        cartCountElement.classList.add('cart-count-animate');
+        setTimeout(() => {
+            cartCountElement.classList.remove('cart-count-animate');
+        }, 1000);
+    } else if (count > 0) {
+        // Create cart count badge if doesn't exist
+        const badge = document.createElement('span');
+        badge.className = 'cart-count';
+        badge.textContent = count;
+        cartIcon.appendChild(badge);
+        badge.classList.add('cart-count-animate');
+    }
+}
+
+// AJAX Add to Cart
+document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('addToCartForm');
     const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const cartNotification = new bootstrap.Toast(document.getElementById('cartNotification'));
+    const errorNotification = new bootstrap.Toast(document.getElementById('errorNotification'));
     
-    if (!form) {
-        console.error('Form not found! Check if user is logged in.');
-        return;
-    }
+    if (!submitBtn || !form) return;
     
-    console.log('Form found:', form);
-    console.log('Submit button:', submitBtn);
-    
-    // Sync quantity awal
-    window.syncQty();
-    
-    // Handle form submit
-    form.addEventListener('submit', function(e) {
-        console.log('=== FORM SUBMIT TRIGGERED ===');
-        console.log('Action:', this.action);
-        console.log('Method:', this.method);
-        console.log('Product ID:', this.querySelector('[name="product_id"]').value);
-        console.log('Quantity:', this.querySelector('[name="qty"]').value);
-        console.log('CSRF Token exists:', !!this.querySelector('[name="_token"]'));
+    submitBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
         
-        // Tampilkan loading state
-        if (submitBtn) {
-            const originalHtml = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-            submitBtn.disabled = true;
+        const originalText = btnText.textContent;
+        const originalHTML = submitBtn.innerHTML;
+        
+        // Get button position for animation
+        const btnRect = submitBtn.getBoundingClientRect();
+        const startX = btnRect.left + btnRect.width / 2 - 20;
+        const startY = btnRect.top + btnRect.height / 2 - 20;
+        
+        // Get cart icon position (target)
+        const cartIcon = document.querySelector('.header-icons a[href*="cart"]');
+        const cartRect = cartIcon.getBoundingClientRect();
+        const endX = cartRect.left + cartRect.width / 2 - 20;
+        const endY = cartRect.top + cartRect.height / 2 - 20;
+        
+        // Create animation
+        createFloatingCartAnimation(startX, startY, endX, endY);
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.textContent = 'Menambahkan...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menambahkan...';
+        
+        try {
+            // Prepare form data
+            const formData = new FormData(form);
             
-            // Restore setelah 3 detik (fallback jika redirect gagal)
+            // Send AJAX request
+            const response = await fetch('{{ route("customer.cart.add") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                // Success animation
+                submitBtn.innerHTML = '<i class="fas fa-check checkmark-animate"></i> Ditambahkan!';
+                submitBtn.style.backgroundColor = 'var(--success)';
+                
+                // Show notification
+                document.getElementById('notificationMessage').textContent = data.message || 'Produk ditambahkan ke keranjang!';
+                cartNotification.show();
+                if (data.requires_login === true) {
+                    setTimeout(() => {
+                        window.location.href = '{{ route("customer.login") }}';
+                    }, 1500);
+                } else {
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalHTML;
+                        submitBtn.style.backgroundColor = '';
+                        btnText.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 2000);
+                }
+                // Update cart count
+                if (data.cart_count !== undefined) {
+                    updateCartCount(data.cart_count);
+                }
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalHTML;
+                    submitBtn.style.backgroundColor = '';
+                    btnText.textContent = originalText;
+                    submitBtn.disabled = false;
+                }, 2000);
+                
+            } else {
+                // Error handling
+                throw new Error(data.message || 'Terjadi kesalahan');
+            }
+            
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            
+            // Show error notification
+            document.getElementById('errorMessage').textContent = error.message;
+            errorNotification.show();
+            
+            // Reset button with error state
+            submitBtn.innerHTML = '<i class="fas fa-times"></i> Gagal';
+            submitBtn.style.backgroundColor = 'var(--accent)';
+            
             setTimeout(() => {
-                submitBtn.innerHTML = originalHtml;
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.style.backgroundColor = '';
+                btnText.textContent = originalText;
                 submitBtn.disabled = false;
-            }, 3000);
+            }, 2000);
         }
-        
-        // Biarkan form submit normal
-        // Tidak ada e.preventDefault()
     });
     
-    // Tambahkan juga click handler untuk button
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
-            console.log('Submit button clicked directly');
-            console.log('Button type:', this.type);
-        });
-    }
-    
-    // Quantity input listeners
-    const qtyInput = document.getElementById('quantity');
-    if (qtyInput) {
-        qtyInput.addEventListener('input', window.syncQty);
-        qtyInput.addEventListener('change', window.syncQty);
-    }
-    
-    // Quantity buttons
-    const qtyButtons = document.querySelectorAll('.qty-btn');
-    qtyButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            console.log('Qty button clicked:', this.textContent);
-        });
-    });
+    // Quantity sync on load
+    syncQty();
 });
 </script>
 @endpush

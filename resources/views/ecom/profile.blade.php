@@ -59,7 +59,7 @@
 <!-- Modal Edit Profile -->
 <div class="modal-overlay" id="editModal" onclick="closeModalOnOutsideClick(event)">
     <div class="modal-container">
-        <form method="POST" action="{{ route('ecom.profile.update') }}" class="modal-content-form">
+        <form method="POST" action="{{ route('customer.profile.update') }}" class="modal-content-form">
             @csrf
 
             <div class="modal-header-custom">

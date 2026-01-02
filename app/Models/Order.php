@@ -26,8 +26,9 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'order_date' => 'date',
-        'total_amount' => 'decimal:2',
+        'paid_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function customer()

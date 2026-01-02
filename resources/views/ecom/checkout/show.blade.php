@@ -53,9 +53,17 @@
                                 </tr>
                                 <tr>
                                     <th>Tanggal</th>
-                                    <td>{{ $order->order_date->format('d/m/Y H:i') }}</td>
+                                    <td>
+                                        @php
+                                            // Cek jika order_date adalah Carbon instance atau string
+                                            if ($order->order_date instanceof \Carbon\Carbon) {
+                                                echo $order->order_date->format('d/m/Y H:i');
+                                            } else {
+                                                echo date('d/m/Y H:i', strtotime($order->order_date));
+                                            }
+                                        @endphp
+                                    </td>
                                 </tr>
-                                <tr>
                                     <th>Total Item</th>
                                     <td>{{ $order->items->count() }} item</td>
                                 </tr>
@@ -93,8 +101,18 @@
                                 @if($order->paid_at)
                                 <tr>
                                     <th>Dibayar pada</th>
-                                    <td>{{ $order->paid_at->format('d/m/Y H:i') }}</td>
-                                </tr>
+                                        <td>
+                                            @if($order->paid_at)
+                                                @php
+                                                    if ($order->paid_at instanceof \Carbon\Carbon) {
+                                                        echo $order->paid_at->format('d/m/Y H:i');
+                                                    } else {
+                                                        echo date('d/m/Y H:i', strtotime($order->paid_at));
+                                                    }
+                                                @endphp
+                                            @endif
+                                        </td>
+                                    </tr>
                                 @endif
                             </table>
                         </div>

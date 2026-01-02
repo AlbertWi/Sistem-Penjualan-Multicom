@@ -1288,15 +1288,15 @@
                     <a href="#">Bantuan</a>
                     @auth
                         <a href="#">{{ Auth::user()->name }}</a>
-                        <a href="{{ route('ecom.logout') }}"
+                        <a href="{{ route('customer.logout') }}"
                         onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                             Logout
                         </a>
-                        <form id="logout-form" action="{{ route('ecom.logout') }}" method="POST" class="d-none">
+                        <form id="logout-form" action="{{ route('customer.logout') }}" method="POST" class="d-none">
                             @csrf
                         </form>
                     @else
-                        <a href="{{ route('ecom.login') }}">Masuk / Daftar</a>
+                        <a href="{{ route('customer.login') }}">Masuk / Daftar</a>
                     @endauth
                 </div>
             </div>
@@ -1320,34 +1320,36 @@
                 </form>
                 <div class="header-icons">
                     @if(auth('customer')->check())
-                        <a href="{{ route('ecom.profile') }}">
+                        <a href="{{ route('customer.profile') }}">
                             <i class="far fa-user"></i>
                             {{ auth('customer')->user()->name }}
                         </a>
 
-                        <a href="{{ route('ecom.logout') }}"
+                        <a href="{{ route('customer.logout') }}"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             Logout
                         </a>
 
                         <form id="logout-form"
-                            action="{{ route('ecom.logout') }}"
+                            action="{{ route('customer.logout') }}"
                             method="POST"
                             class="d-none">
                             @csrf
                         </form>
                     @else
-                        <a href="{{ route('ecom.login') }}">Masuk / Daftar</a>
+                        <a href="{{ route('customer.login') }}">Masuk / Daftar</a>
                     @endif
 
                     <!-- Cart icon di luar conditional -->
-                    <a href="{{ route('cart.index') }}" style="margin-left: 20px;">
+                    <a href="{{ route('cart.index') }}" id="cartIcon" style="margin-left: 20px; position: relative;">
                         <i class="fas fa-shopping-cart"></i>
                         @php
                             $cartCount = collect(session('cart', []))->sum('qty');
                         @endphp
                         @if($cartCount > 0)
-                            <span class="cart-count">{{ $cartCount }}</span>
+                            <span class="cart-count" id="cartCountBadge">{{ $cartCount }}</span>
+                        @else
+                            <span class="cart-count" id="cartCountBadge" style="display: none;">0</span>
                         @endif
                     </a>
                 </div>
@@ -1429,5 +1431,6 @@
     </script>
     
     @stack('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

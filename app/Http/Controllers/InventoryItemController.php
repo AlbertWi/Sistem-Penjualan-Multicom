@@ -12,7 +12,7 @@ class InventoryItemController extends Controller
     public function index()
     {
         $branches = Branch::all();
-        return view('admin.inventory.index', compact('branches'));
+        return view('manajer_operasional.inventory.index', compact('branches'));
     }
     public function show($branchId)
     {

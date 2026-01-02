@@ -15,7 +15,7 @@
                     </ul>
                 </div>
             @endif
-        <form method="POST" action="{{ route('ecom.login') }}">
+        <form method="POST" action="{{ route('customer.login') }}">
             @csrf
 
             <div class="form-group">
@@ -32,7 +32,7 @@
 
             <div class="text-center mt-3">
                 Belum punya akun?
-                <a href="{{ route('ecom.register') }}" class="auth-link">Daftar</a>
+                <a href="{{ route('customer.register') }}" class="auth-link">Daftar</a>
             </div>
         </form>
     </div>
