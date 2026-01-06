@@ -22,12 +22,12 @@
                 </li>
 
                 @if(Auth::check() && Auth::user()->role === 'manajer_operasional')
-                    <!-- MASTER DATA -->
+                    <!-- DATA MASTER -->
                     <li class="nav-item has-treeview {{ request()->is('manajer_operasional/brands*', 'manajer_operasional/types*', 'manajer_operasional/products*', 'manajer_operasional/accessories*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('manajer_operasional/brands*', 'manajer_operasional/types*', 'manajer_operasional/products*', 'manajer_operasional/accessories*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-database"></i>
                             <p>
-                                Master Data
+                                Data Master
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -35,42 +35,42 @@
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.brands.index') }}" class="nav-link {{ request()->is('manajer_operasional/brands*') ? 'active' : '' }}">
                                     <i class="nav-icon far fa-copyright"></i>
-                                    <p>Brands</p>
+                                    <p>Merek</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.types.index') }}" class="nav-link {{ request()->is('manajer_operasional/types*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-mobile-alt"></i>
-                                    <p>Types</p>
+                                    <p>Tipe</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.products.index') }}" class="nav-link {{ request()->is('manajer_operasional/products*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-box"></i>
-                                    <p>Products</p>
+                                    <p>Produk</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.accessories.index') }}" class="nav-link {{ request()->is('manajer_operasional/accessories*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-headphones"></i>
-                                    <p>Accessories</p>
+                                    <p>Aksesoris</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.inventory.editPrice') }}" class="nav-link {{ request()->is('manajer_operasional/inventory/edit-price*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-money-bill-wave text-warning"></i>
-                                    <p>Edit Purchase Price</p>
+                                    <p>Edit Harga Beli</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- CUSTOMERS & SUPPLIERS -->
+                    <!-- KONTAK -->
                     <li class="nav-item has-treeview {{ request()->is('manajer_operasional/customers*', 'manajer_operasional/suppliers*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('manajer_operasional/customers*', 'manajer_operasional/suppliers*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-address-book"></i>
                             <p>
-                                Contacts
+                                Kontak
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -78,32 +78,32 @@
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.customers.index') }}" class="nav-link {{ request()->is('manajer_operasional/customers*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-user-friends"></i>
-                                    <p>Customers</p>
+                                    <p>Pelanggan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.suppliers.index') }}" class="nav-link {{ request()->is('manajer_operasional/suppliers*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-truck"></i>
-                                    <p>Suppliers</p>
+                                    <p>Supplier</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- PURCHASES -->
+                    <!-- PEMBELIAN -->
                     <li class="nav-item">
                         <a href="{{ route('purchases.index') }}" class="nav-link {{ request()->is('purchases*') && !request()->is('owner/purchases*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Purchases</p>
+                            <p>Pembelian</p>
                         </a>
                     </li>
 
-                    <!-- STOCK MANAGEMENT -->
+                    <!-- MANAJEMEN STOK -->
                     <li class="nav-item has-treeview {{ request()->is('stock-transfers*', 'stok-cabang*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('stock-transfers*', 'stok-cabang*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-warehouse"></i>
                             <p>
-                                Stock Management
+                                Manajemen Stok
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -111,19 +111,19 @@
                             <li class="nav-item">
                                 <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->is('stock-transfers*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-exchange-alt"></i>
-                                    <p>Stock Transfers</p>
+                                    <p>Transfer Stok</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('stok-cabang') }}" class="nav-link {{ request()->is('stok-cabang*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-boxes"></i>
-                                    <p>Branch Stock</p>
+                                    <p>Stok Cabang</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <!-- E-COMMERCE MANAGEMENT -->
+                    <!-- E-COMMERCE -->
                     <li class="nav-item has-treeview {{ request()->is('manajer_operasional/ecom*', 'manajer_operasional/orders*', 'manajer_operasional/inventory*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('manajer_operasional/ecom*', 'manajer_operasional/orders*', 'manajer_operasional/inventory*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-store"></i>
@@ -133,19 +133,19 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <!-- Products for E-commerce -->
+                            <!-- Produk E-commerce -->
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.inventory.for_ecom') }}" class="nav-link {{ request()->is('manajer_operasional/inventory/for_ecom*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-shopping-cart"></i>
-                                    <p>E-commerce Products</p>
+                                    <p>Produk E-commerce</p>
                                 </a>
                             </li>
 
-                            <!-- Online Orders -->
+                            <!-- Pesanan Online -->
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.orders.index') }}" class="nav-link {{ request()->is('manajer_operasional/orders*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-shopping-bag"></i>
-                                    <p>Online Orders</p>
+                                    <p>Pesanan Online</p>
                                     @php
                                         $pendingOrdersCount = \App\Models\Order::where('status', 'pending')->count();
                                     @endphp
@@ -154,48 +154,48 @@
                                     @endif
                                 </a>
                             </li>
-                            <!-- Manage Listings -->
+                            <!-- Posting E-commerce -->
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.ecom.listings') }}" class="nav-link {{ request()->is('manajer_operasional/ecom/listings*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-tags"></i>
-                                    <p>Posting E-Commerce</p>
+                                    <p>Posting E-commerce</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
                 @elseif(Auth::check() && Auth::user()->role === 'kepala_toko')
-                    <!-- KEPALA TOKO MENU -->
+                    <!-- MENU KEPALA TOKO -->
                     <li class="nav-item">
                         <a href="{{ route('sales.index') }}" class="nav-link {{ request()->is('sales*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-cash-register"></i>
-                            <p>Sales</p>
+                            <p>Penjualan</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->is('stock-transfers*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-exchange-alt"></i>
-                            <p>Stock Transfers</p>
+                            <p>Transfer Stok</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('purchases.index') }}" class="nav-link {{ request()->is('purchases*') && !request()->is('owner/purchases*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Purchases</p>
+                            <p>Pembelian</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('stok-cabang') }}" class="nav-link {{ request()->is('stok-cabang*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-warehouse"></i>
-                            <p>Branch Stock</p>
+                            <p>Stok Cabang</p>
                         </a>
                     </li>
 
                 @elseif(Auth::check() && Auth::user()->role === 'owner')
-                    <!-- OWNER MENU -->
+                    <!-- MENU OWNER -->
                     <li class="nav-item">
                         <a href="{{ route('stok-cabang') }}" class="nav-link {{ request()->is('stok-cabang*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-boxes"></i>
-                            <p>Stock Overview</p>
+                            <p>Overview Stok</p>
                         </a>
                     </li>
 
@@ -203,7 +203,7 @@
                         <a href="#" class="nav-link {{ request()->is('owner/branches*', 'owner/users*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-building"></i>
                             <p>
-                                Management
+                                Manajemen
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -211,13 +211,13 @@
                             <li class="nav-item">
                                 <a href="{{ route('owner.branches.index') }}" class="nav-link {{ request()->is('owner/branches*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-store"></i>
-                                    <p>Branch Management</p>
+                                    <p>Manajemen Cabang</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('owner.users.index') }}" class="nav-link {{ request()->is('owner/users*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-users-cog"></i>
-                                    <p>User Management</p>
+                                    <p>Manajemen User</p>
                                 </a>
                             </li>
                         </ul>
@@ -227,27 +227,34 @@
                         <a href="#" class="nav-link {{ request()->is('owner/sales*', 'owner/purchases*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-invoice-dollar"></i>
                             <p>
-                                Payment Settlements
+                                Pelunasan
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('owner.sales.index') }}" class="nav-link {{ request()->is('owner/sales*') ? 'active' : '' }}">
+                                <a href="{{ route('owner.sales.lunas') }}" class="nav-link {{ request()->is('owner/sales*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-cash-register"></i>
-                                    <p>Sales Settlements</p>
+                                    <p>Pelunasan Penjualan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('owner.purchases.index') }}" class="nav-link {{ request()->is('owner/purchases*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-shopping-cart"></i>
-                                    <p>Purchase Settlements</p>
+                                    <p>Pelunasan Pembelian</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('owner.sales.index') }}"
+                        class="nav-link {{ request()->is('owner/sales*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-cash-register"></i>
+                            <p>Penjualan</p>
+                        </a>
+                    </li>
 
-                    <!-- E-COMMERCE OVERVIEW (Owner) -->
+                    <!-- E-COMMERCE (Owner) -->
                     <li class="nav-item has-treeview {{ request()->is('owner/ecom*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('owner/ecom*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-globe"></i>
@@ -260,23 +267,24 @@
                             <li class="nav-item">
                                 <a href="{{ route('owner.ecom.overview') }}" class="nav-link {{ request()->is('owner/ecom/overview*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-chart-line"></i>
-                                    <p>E-commerce Overview</p>
+                                    <p>Overview E-commerce</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('owner.ecom.orders') }}" class="nav-link {{ request()->is('owner/ecom/orders*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-shopping-bag"></i>
-                                    <p>Online Orders</p>
+                                    <p>Pesanan Online</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="nav-item has-treeview {{ request()->is('owner/laporan*', 'owner/stocksReport*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('owner/laporan*', 'owner/stocksReport*') ? 'active' : '' }}">
+                    <!-- LAPORAN & ANALITIK -->
+                    <li class="nav-item has-treeview {{ request()->is('owner/laporan*', 'owner/stocksReport*', 'owner/reports*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ request()->is('owner/laporan*', 'owner/stocksReport*', 'owner/reports*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-pie"></i>
                             <p>
-                                Reports & Analytics
+                                Laporan & Analitik
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
@@ -284,19 +292,19 @@
                             <li class="nav-item">
                                 <a href="{{ route('owner.laporan.penjualan') }}" class="nav-link {{ request()->is('owner/laporan/penjualan*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-chart-bar"></i>
-                                    <p>Branch Sales Report</p>
+                                    <p>Laporan Penjualan</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('owner.stocksReport.index') }}" class="nav-link {{ request()->is('owner/stocksReport*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-boxes"></i>
-                                    <p>Stock Report</p>
+                                    <p>Laporan Stok</p>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a href="{{ route('owner.reports.financial') }}" class="nav-link {{ request()->is('owner/reports/financial*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                                    <p>Financial Report</p>
+                                    <p>Laporan Keuangan</p>
                                 </a>
                             </li>
                         </ul>
@@ -307,7 +315,7 @@
                 <li class="nav-item">
                     <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
-                        <p class="text-danger">Logout</p>
+                        <p class="text-danger">Keluar</p>
                     </a>
                     <form id="logout-form" action="{{ route('logout.admin') }}" method="POST" style="display: none;">
                         @csrf
@@ -319,7 +327,7 @@
 </aside>
 
 <style>
-    /* Custom styling for sidebar */
+    /* Styling kustom untuk sidebar */
     .nav-sidebar > .nav-item > .nav-link.active {
         background-color: #007bff;
         border-color: #007bff;
@@ -330,7 +338,7 @@
         color: #007bff;
     }
     
-    /* Badge styling */
+    /* Styling badge */
     .badge-danger {
         animation: pulse 2s infinite;
     }
@@ -341,7 +349,7 @@
         100% { transform: scale(1); }
     }
     
-    /* Icon colors */
+    /* Warna ikon */
     .nav-icon.text-warning {
         color: #ffc107 !important;
     }
@@ -349,10 +357,16 @@
     .nav-icon.text-danger {
         color: #dc3545 !important;
     }
+    
+    /* Menu khusus owner dengan warna berbeda */
+    .nav-link .text-warning {
+        color: #ffc107 !important;
+        font-weight: bold;
+    }
 </style>
 
 <script>
-    // Auto-expand active menu
+    // Auto-expand menu aktif
     document.addEventListener('DOMContentLoaded', function() {
         const activeLinks = document.querySelectorAll('.nav-link.active');
         activeLinks.forEach(link => {
@@ -361,7 +375,7 @@
                 treeview.classList.add('menu-open');
             }
             
-            // Expand parent nav-item if exists
+            // Expand parent nav-item jika ada
             const parentNavItem = link.closest('.nav-treeview');
             if (parentNavItem) {
                 const parentTreeview = parentNavItem.closest('.has-treeview');
@@ -370,5 +384,18 @@
                 }
             }
         });
+        
+        // Highlight menu baru untuk owner
+        const editSalesMenu = document.querySelector('a[href*="owner/sales/edit"]');
+        if (editSalesMenu) {
+            editSalesMenu.addEventListener('click', function() {
+                // Hapus active dari semua menu
+                document.querySelectorAll('.nav-link.active').forEach(link => {
+                    link.classList.remove('active');
+                });
+                // Tambah active ke menu ini
+                this.classList.add('active');
+            });
+        }
     });
 </script>

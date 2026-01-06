@@ -37,7 +37,7 @@ class AuthController extends Controller
         }
         Auth::guard('web')->logout();
 
-        return redirect()->route('login');
+        return redirect()->route('login.admin');
     }
         public function showLoginForm()
     {

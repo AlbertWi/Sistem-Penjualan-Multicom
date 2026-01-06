@@ -143,6 +143,9 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Sales Settlements
         Route::get('/sales', [SaleController::class, 'ownerIndex'])->name('sales.index');
+        Route::get('/sales/{id}/edit', [SaleController::class, 'ownerEdit'])->name('sales.edit');
+        Route::put('/sales/{id}', [SaleController::class, 'ownerUpdate'])->name('sales.update');
+        Route::get('/sales/pelunasan', [SaleController::class, 'ownerLunas'])->name('sales.lunas');
         Route::post('/sales/{sale}/pelunasan', [SaleController::class, 'pelunasan'])->name('sales.pelunasan');
         
         // Purchase Settlements

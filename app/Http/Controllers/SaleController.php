@@ -568,8 +568,15 @@ class SaleController extends Controller
     {
         return view('kepala_toko.sales.print', compact('sale'));
     }
+    public function ownerIndex()
+    {
+        $sales = Sale::with(['customer', 'branch'])
+            ->latest()
+            ->paginate(10);
 
-    public function ownerIndex(Request $request)
+        return view('owner.sales.index', compact('sales'));
+    }
+    public function ownerLunas(Request $request)
     {
         $query = Sale::with(['branch', 'customer', 'saleItems.product', 'saleAccessories.accessory']);
     
@@ -618,7 +625,7 @@ class SaleController extends Controller
         $queryLunas = clone $queryTotal;
         $totalLunas = $queryLunas->where('status', 'lunas')->sum('total');
     
-        return view('owner.sales.index', compact(
+        return view('owner.sales.lunas', compact(
             'sales', 
             'branches', 
             'totalSeluruh', 
@@ -651,6 +658,126 @@ class SaleController extends Controller
             'data' => $customers
         ]);
     }
+    // Method untuk menampilkan halaman edit penjualan (owner)
+    public function ownerEdit($id)
+    {
+        $sale = Sale::with([
+            'items.product',
+            'items.inventoryItem',
+            'items.accessory',
+            'customer',
+            'branch'
+        ])->findOrFail($id);
 
+        $customers = Customer::all();
+            $itemsForJs = $sale->items->map(function ($i) {
+            return [
+                'type' => $i->imei ? 'Phone' : 'Accessory',
+                'name' => $i->product->name ?? optional($i->accessory)->name,
+                'imei' => $i->imei,
+                'product_id' => $i->product_id,
+                'accessory_id' => $i->accessory_id,
+                'price' => $i->price,
+                'modal' => optional($i->inventoryItem)->purchase_price ?? 0,
+            ];
+        });
+        return view('owner.sales.edit', compact('sale', 'customers','itemsForJs'));
+    }
+    // Method untuk update penjualan (owner)
+    public function ownerUpdate(Request $request, $id)
+    {
+        $sale = Sale::with('items.inventoryItem')->findOrFail($id);
+
+        DB::transaction(function () use ($request, $sale) {
+
+            // =============================
+            // 🔴 JIKA ITEM KOSONG → HAPUS SALE
+            // =============================
+            if (!$request->has('items') || count($request->items) === 0) {
+
+                // kembalikan stok HP
+                foreach ($sale->items as $item) {
+                    if ($item->inventoryItem) {
+                        $item->inventoryItem->update([
+                            'status' => 'in_stock'
+                        ]);
+                    }
+                }
+
+                // hapus item
+                $sale->items()->delete();
+
+                // hapus sale
+                $sale->delete();
+
+                return;
+            }
+
+            // =============================
+            // 🔄 RESET ITEM LAMA (AMAN)
+            // =============================
+            foreach ($sale->items as $item) {
+                if ($item->inventoryItem) {
+                    $item->inventoryItem->update([
+                        'status' => 'in_stock'
+                    ]);
+                }
+            }
+
+            $sale->items()->delete();
+
+            // =============================
+            // 🔄 UPDATE DATA SALE
+            // =============================
+            $sale->update([
+                'customer_id' => $request->customer_id,
+                'total' => collect($request->items)->sum('price'),
+            ]);
+
+            // =============================
+            // ➕ SIMPAN ITEM BARU
+            // =============================
+            foreach ($request->items as $i) {
+
+                // PHONE (IMEI)
+                if (!empty($i['imei'])) {
+
+                    $inventory = InventoryItem::where('imei', $i['imei'])
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    $inventory->update(['status' => 'sold']);
+
+                    SaleItem::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $inventory->product_id,
+                        'imei' => $inventory->imei,
+                        'price' => $i['price'],
+                    ]);
+
+                } 
+                // ACCESSORY
+                else {
+
+                    SaleItem::create([
+                        'sale_id' => $sale->id,
+                        'accessory_id' => $i['accessory_id'],
+                        'price' => $i['price'],
+                    ]);
+                }
+            }
+        });
+
+        // ⬅️ jika sale dihapus
+        if (!Sale::where('id', $id)->exists()) {
+            return redirect()
+                ->route('owner.sales.index')
+                ->with('success', 'Penjualan berhasil dihapus karena tidak ada item.');
+        }
+
+        return redirect()
+            ->route('owner.sales.index')
+            ->with('success', 'Penjualan berhasil diperbarui.');
+    }
 
 }

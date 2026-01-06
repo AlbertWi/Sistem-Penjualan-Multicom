@@ -22,5 +22,8 @@ class SaleItem extends Model
     {
         return $this->belongsTo(\App\Models\InventoryItem::class, 'imei', 'imei');
     }
-
+    public function accessory()
+    {
+        return $this->belongsTo(Accessory::class);
+    }
 }
