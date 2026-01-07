@@ -22,13 +22,23 @@ class Order extends Model
         'order_date',
         'paid_at',
         'cancelled_at',
-        'cancellation_reason'
+        'cancellation_reason',
+        'stock_picked_at',
+        'stock_picked_by',
+        'completed_at',
+        'completed_by',
+        'cancelled_by',
     ];
 
     protected $casts = [
         'paid_at' => 'datetime',
+        'stock_picked_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'order_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'total_amount' => 'decimal:2',
     ];
 
     public function customer()
@@ -39,5 +49,24 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function stockPickedByUser()
+    {
+        return $this->belongsTo(User::class, 'stock_picked_by');
+    }
+
+    public function completedByUser()
+    {
+        return $this->belongsTo(User::class, 'completed_by');
+    }
+
+    public function cancelledByUser()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
     }
 }

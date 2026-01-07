@@ -8,7 +8,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 mb-0">Riwayat Pesanan</h1>
-                <a href="{{ route('catalog.index') }}" class="btn btn-outline-primary">
+                <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-primary">
                     <i class="fas fa-shopping-bag me-2"></i>Lanjut Belanja
                 </a>
             </div>
@@ -104,7 +104,7 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <a href="{{ route('orders.show', $order->id) }}" 
+                                            <a href="{{ route('customer.orders.show', $order->id) }}" 
                                                class="btn btn-outline-primary"
                                                title="Detail">
                                                 <i class="fas fa-eye"></i>
@@ -135,7 +135,7 @@
                                                 <p><strong>{{ $order->order_number }}</strong></p>
                                                 <p>Total: <strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong></p>
                                                 
-                                                <form action="{{ route('orders.payment', $order->id) }}" method="POST" id="paymentForm{{ $order->id }}">
+                                                <form action="{{ route('customer.orders.payment', $order->id) }}" method="POST" id="paymentForm{{ $order->id }}">
                                                     @csrf
                                                     @method('PUT')
                                                     

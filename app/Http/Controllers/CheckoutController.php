@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\InventoryItem;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -18,10 +21,11 @@ class CheckoutController extends Controller
 
         return view('ecom.checkout.index', compact('orders'));
     }
+    
     public function store(Request $request)
     {
         if (!auth()->guard('customer')->check()) {
-            return redirect()->route('ecom.login')
+            return redirect()->route('customer.login')
                 ->with('error', 'Silakan login terlebih dahulu untuk checkout.');
         }
 
@@ -37,17 +41,32 @@ class CheckoutController extends Controller
         try {
             $customerId = auth()->guard('customer')->id();
             $total = 0;
-            $branchAllocations = []; // Untuk tracking alokasi per cabang
+            $branchAllocations = [];
             
             // Step 1: Validasi dan alokasi stok
             foreach ($cart as $productId => $item) {
                 // Cek stok tersedia di seluruh cabang
+                // PERBAIKAN: Tambahkan kondisi untuk cek stok yang belum direserve
                 $availableItems = InventoryItem::with('branch')
                     ->where('product_id', $productId)
                     ->where('status', 'in_stock')
                     ->where('is_listed', true)
+                    // PENTING: Pastikan tidak sudah direserve untuk order lain
+                    ->whereDoesntHave('orderItems', function($query) {
+                        $query->whereHas('order', function($q) {
+                            $q->whereIn('status', ['pending', 'processing']);
+                        });
+                    })
                     ->orderBy('branch_id')
+                    ->limit($item['qty'] * 2) // Ambil lebih banyak untuk safety
                     ->get();
+                
+                Log::info('Stock Check:', [
+                    'product_id' => $productId,
+                    'requested_qty' => $item['qty'],
+                    'available_count' => $availableItems->count(),
+                    'items' => $availableItems->pluck('id')->toArray()
+                ]);
                 
                 if ($availableItems->count() < $item['qty']) {
                     $product = Product::find($productId);
@@ -57,15 +76,27 @@ class CheckoutController extends Controller
                     );
                 }
                 
-                // Alokasi stok berdasarkan strategi:
-                // 1. Prioritaskan cabang dengan stok terbanyak
-                // 2. Atau cabang tertentu jika dipilih customer
-                
+                // Alokasi stok
                 $allocatedItems = [];
                 $remainingQty = $item['qty'];
                 
                 foreach ($availableItems as $inventoryItem) {
                     if ($remainingQty <= 0) break;
+                    
+                    // Double check: Pastikan item ini belum di-assign
+                    $alreadyAssigned = OrderItem::where('inventory_item_id', $inventoryItem->id)
+                        ->whereHas('order', function($q) {
+                            $q->whereIn('status', ['pending', 'processing']);
+                        })
+                        ->exists();
+                    
+                    if ($alreadyAssigned) {
+                        Log::warning('Inventory already assigned, skipping', [
+                            'inventory_id' => $inventoryItem->id,
+                            'imei' => $inventoryItem->imei
+                        ]);
+                        continue;
+                    }
                     
                     $allocatedItems[] = $inventoryItem;
                     $remainingQty--;
@@ -81,6 +112,15 @@ class CheckoutController extends Controller
                         'qty' => 1,
                         'price' => $item['price']
                     ];
+                }
+                
+                // Validasi final: Apakah cukup setelah filtering?
+                if (count($allocatedItems) < $item['qty']) {
+                    $product = Product::find($productId);
+                    throw new \Exception(
+                        "Stok {$product->name} tidak mencukupi setelah validasi. " .
+                        "Tersedia: " . count($allocatedItems) . ", Diminta: {$item['qty']}"
+                    );
                 }
                 
                 // Simpan alokasi sementara
@@ -100,26 +140,35 @@ class CheckoutController extends Controller
                 'order_date' => now(),
             ]);
             
-            // Step 3: Buat Order Items & Update Inventory
+            // Step 3: Buat Order Items & Reserve Inventory
             foreach ($cart as $productId => $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $productId,
-                    'quantity' => $item['qty'],
-                    'price' => $item['price'],
-                    'subtotal' => $item['price'] * $item['qty'],
-                ]);
-
+                foreach ($item['allocated_items'] as $inventoryItem) {
+                    // Buat order item dengan inventory_item_id
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $productId,
+                        'inventory_item_id' => $inventoryItem->id, // ASSIGN LANGSUNG
+                        'branch_id' => $inventoryItem->branch_id,
+                        'quantity' => 1, // 1 item = 1 inventory_item
+                        'price' => $item['price'],
+                        'subtotal' => $item['price'],
+                    ]);
+                    
+                    // Update inventory status ke reserved
+                    $inventoryItem->update([
+                        'status' => 'reserved',
+                        'is_listed' => false,
+                        'reserved_at' => now()
+                    ]);
+                    
+                    Log::info('Inventory reserved:', [
+                        'inventory_id' => $inventoryItem->id,
+                        'imei' => $inventoryItem->imei,
+                        'order_id' => $order->id
+                    ]);
+                }
             }
-            InventoryItem::where('product_id', $productId)
-                ->where('status', 'in_stock')
-                ->where('is_listed', true)
-                ->limit($item['qty'])
-                ->update([
-                    'status' => 'reserved',
-                    'reserved_order_id' => $order->id
-                ]);
-
+            
             // Step 4: Kosongkan cart
             session()->forget('cart');
             
@@ -131,12 +180,13 @@ class CheckoutController extends Controller
                 'order_number' => $order->order_number,
                 'customer_id' => $customerId,
                 'total' => $total,
+                'items_count' => $order->items()->count(),
                 'branch_allocations' => array_keys($branchAllocations)
             ]);
             
-            return redirect()->route('orders.show', $order->id)
+            return redirect()->route('customer.orders.show', $order->id)
                 ->with('success', 'Pesanan berhasil dibuat!')
-                ->with('branch_info', 'Stok dialokasikan dari beberapa cabang.');
+                ->with('info', 'Silakan lakukan pembayaran untuk melanjutkan pesanan.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -151,84 +201,16 @@ class CheckoutController extends Controller
                 ->with('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
         }
     }
-    public function confirmStockPickup(Request $request, $orderId)
-    {
-        // Hanya manager_operasional atau admin yang bisa akses
-        if (!auth()->user()->hasRole(['admin', 'manager_operasional'])) {
-            abort(403, 'Unauthorized access.');
-        }
-        
-        $order = Order::with(['items.inventoryItem.branch', 'customer'])
-            ->findOrFail($orderId);
-        
-        if ($order->status != 'pending') {
-            return back()->with('error', 'Order sudah diproses.');
-        }
-        
-        DB::beginTransaction();
-        try {
-            // Update status inventory items menjadi "sold"
-            foreach ($order->items as $orderItem) {
-                if ($orderItem->inventoryItem) {
-                    $orderItem->inventoryItem->update([
-                        'status' => 'sold',
-                        'sold_at' => now()
-                    ]);
-                }
-            }
-            
-            // Update order status
-            $order->update([
-                'status' => 'processing',
-                'stock_picked_at' => now(),
-                'stock_picked_by' => auth()->id()
-            ]);
-            
-            DB::commit();
-            
-            return redirect()->route('admin.orders.show', $order->id)
-                ->with('success', 'Stok berhasil dikonfirmasi diambil dari cabang.');
-                
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal mengkonfirmasi pengambilan stok.');
-        }
-    }
-    
-    /**
-     * Get available branches for a product
-     */
-    public function getProductBranches($productId)
-    {
-        $branches = InventoryItem::where('product_id', $productId)
-            ->where('status', 'in_stock')
-            ->where('is_listed', true)
-            ->with('branch')
-            ->get()
-            ->groupBy('branch_id')
-            ->map(function ($items, $branchId) {
-                $branch = $items->first()->branch;
-                return [
-                    'id' => $branchId,
-                    'name' => $branch->name,
-                    'stock' => $items->count(),
-                    'address' => $branch->address,
-                    'city' => $branch->city
-                ];
-            })
-            ->values();
-            
-        return response()->json($branches);
-    }
 
     public function show($id)
     {
-        $order = Order::with(['items.product', 'customer'])
+        $order = Order::with(['items.product.brand', 'items.inventoryItem', 'customer'])
             ->where('customer_id', auth()->guard('customer')->id())
             ->findOrFail($id);
 
         return view('ecom.checkout.show', compact('order'));
     }
+
     public function payment(Request $request, $id)
     {
         $order = Order::where('customer_id', auth()->guard('customer')->id())
@@ -254,29 +236,60 @@ class CheckoutController extends Controller
             $order->update(['payment_proof' => $path]);
         }
         
-        return redirect()->route('orders.show', $order->id)
+        Log::channel('order')->info('Payment confirmed', [
+            'order_id' => $order->id,
+            'payment_method' => $request->payment_method
+        ]);
+        
+        return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Pembayaran berhasil dikonfirmasi.');
     }
 
     public function cancel($id)
     {
-        $order = Order::where('customer_id', auth()->guard('customer')->id())
+        $order = Order::with('items.inventoryItem')
+            ->where('customer_id', auth()->guard('customer')->id())
             ->findOrFail($id);
         
         // Hanya bisa cancel jika status pending
-        if ($order->status == 'pending') {
+        if ($order->status != 'pending') {
+            return redirect()->route('customer.orders.index')
+                ->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses.');
+        }
+        
+        DB::beginTransaction();
+        try {
+            // Return inventory ke stock
+            foreach ($order->items as $item) {
+                if ($item->inventoryItem) {
+                    $item->inventoryItem->update([
+                        'status' => 'in_stock',
+                        'is_listed' => true,
+                        'reserved_at' => null
+                    ]);
+                }
+            }
+            
             $order->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
                 'cancellation_reason' => 'Dibatalkan oleh customer',
             ]);
             
-            return redirect()->route('orders.index')
-                ->with('success', 'Pesanan berhasil dibatalkan.');
+            DB::commit();
+            
+            Log::channel('order')->info('Order cancelled by customer', [
+                'order_id' => $order->id,
+                'customer_id' => $order->customer_id
+            ]);
+            
+            return redirect()->route('customer.orders.index')
+                ->with('success', 'Pesanan berhasil dibatalkan. Stok telah dikembalikan.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('customer.orders.index')
+                ->with('error', 'Gagal membatalkan pesanan.');
         }
-        
-        return redirect()->route('orders.index')
-            ->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
-    
 }

@@ -38,7 +38,7 @@
                         <p><strong>Subtotal: Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}</strong></p>
                     </div>
                     
-                    <form action="{{ route('cart.remove', $id) }}" method="POST">
+                    <form action="{{ route('customer.cart.remove', $id) }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash"></i>
@@ -50,7 +50,7 @@
             <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
                 <h3>Total: Rp {{ number_format(collect($cart)->sum(fn($item) => $item['price'] * $item['qty']), 0, ',', '.') }}</h3>
                 @if(!empty($cart))
-                    <form action="{{ route('checkout.store') }}" method="POST">
+                    <form action="{{ route('customer.checkout.store') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-success btn-lg">
                             <i class="fas fa-credit-card"></i> Checkout

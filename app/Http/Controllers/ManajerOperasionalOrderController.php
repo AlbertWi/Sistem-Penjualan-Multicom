@@ -1,14 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Branch;
 use App\Models\InventoryItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Auth;
 class  ManajerOperasionalOrderController extends Controller
 {
     /**
@@ -64,22 +65,34 @@ class  ManajerOperasionalOrderController extends Controller
         
         return view('manajer_operasional.orders.index', compact('orders', 'stats', ));
     }
-    
-    /**
-     * Display order details
-     */
     public function show($id)
     {
         $order = Order::with([
             'customer',
-            'items.product.brand',
-            'items.product.images',
-            'items.inventoryItem',
-            'items.branch'
+            'branch', // Load order branch
+            'items' => function($query) {
+                $query->with([
+                    'product.brand',
+                    'product.images',
+                    'inventoryItem.branch', // Load inventory item dengan branch-nya
+                    'branch' // Load item branch
+                ]);
+            }
         ])->findOrFail($id);
         
-        // Group items by branch
-        $itemsByBranch = $order->items->groupBy('branch_id');
+        // Group items by branch - with safer logic
+        $itemsByBranch = $order->items->groupBy(function($item) {
+            // Priority: inventory_item branch > order_item branch > 'unknown'
+            if ($item->inventoryItem && $item->inventoryItem->branch_id) {
+                return $item->inventoryItem->branch_id;
+            }
+            
+            if ($item->branch_id) {
+                return $item->branch_id;
+            }
+            
+            return 'unknown';
+        });
         
         // Get available inventory for each product (for reallocation)
         $availableInventory = [];
@@ -390,8 +403,12 @@ class  ManajerOperasionalOrderController extends Controller
     {
         $order = Order::with([
             'customer',
-            'items.product',
-            'items.inventoryItem'
+            'items' => function($query) {
+                $query->with([
+                    'product.brand',
+                    'inventoryItem'
+                ]);
+            }
         ])->findOrFail($orderId);
         
         return view('manajer_operasional.orders.print', compact('order'));
@@ -434,5 +451,118 @@ class  ManajerOperasionalOrderController extends Controller
         $order->update($updateData);
         
         return back()->with('success', 'Status order berhasil diperbarui.');
+    }
+    public function assignImei(Order $order, OrderItem $orderItem)
+    {
+        $order = Order::with(['customer', 'items'])->findOrFail($order->id);
+        $orderItem = $order->items->find($orderItem->id);
+        
+        if (!$orderItem) {
+            return back()->with('error', 'Order item tidak ditemukan.');
+        }
+        
+        // Check if already assigned
+        if ($orderItem->inventory_item_id) {
+            return back()->with('error', 'IMEI sudah di-assign untuk item ini.');
+        }
+        
+        // Get available inventory for this product
+        $availableInventory = InventoryItem::where('product_id', $orderItem->product_id)
+            ->where('status', 'in_stock')
+            ->where('is_listed', true)
+            ->with('branch')
+            ->orderBy('branch_id')
+            ->orderBy('imei')
+            ->get();
+        
+        // Group by branch for better display
+        $inventoryByBranch = $availableInventory->groupBy('branch_id')->map(function ($items, $branchId) {
+            return [
+                'branch' => $items->first()->branch,
+                'items' => $items
+            ];
+        });
+        
+        return view('manajer_operasional.orders.assign-imei', compact(
+            'order',
+            'orderItem',
+            'availableInventory',
+            'inventoryByBranch'
+        ));
+    }
+
+    /**
+     * Store assigned IMEI for order item
+     */
+    public function storeAssignedImei(Request $request, Order $order, OrderItem $orderItem)
+    {
+        $request->validate([
+            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'notes' => 'nullable|string|max:500'
+        ]);
+        
+        $order = Order::with('items')->findOrFail($order->id);
+        $orderItem = $order->items->find($orderItem->id);
+        
+        if (!$orderItem) {
+            return back()->with('error', 'Order item tidak ditemukan.');
+        }
+        
+        // Check if inventory item is still available
+        $inventoryItem = InventoryItem::where('id', $request->inventory_item_id)
+            ->where('product_id', $orderItem->product_id)
+            ->where('status', 'in_stock')
+            ->where('is_listed', true)
+            ->first();
+        
+        if (!$inventoryItem) {
+            return back()->with('error', 'IMEI tidak tersedia atau sudah di-assign.');
+        }
+        
+        DB::beginTransaction();
+        try {
+            // Update order item with inventory
+            $orderItem->update([
+                'inventory_item_id' => $inventoryItem->id,
+                'branch_id' => $inventoryItem->branch_id
+            ]);
+            
+            // Update inventory status
+            $inventoryItem->update([
+                'status' => 'reserved',
+                'is_listed' => false,
+                'reserved_at' => now()
+            ]);
+            
+            // Add notes if provided
+            if ($request->notes) {
+                $currentNotes = $order->notes ? $order->notes . "\n" : '';
+                $order->update([
+                    'notes' => $currentNotes . "[IMEI Assignment] " . $request->notes
+                ]);
+            }
+            
+            DB::commit();
+            
+            Log::channel('order')->info('IMEI assigned to order item', [
+                'order_id' => $order->id,
+                'order_item_id' => $orderItem->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'imei' => $inventoryItem->imei,
+                'assigned_by' => auth()->id()
+            ]);
+            
+            return redirect()->route('manajer_operasional.orders.show', $order)
+                ->with('success', 'IMEI berhasil di-assign ke order item.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('IMEI assignment failed', [
+                'order_id' => $order->id,
+                'order_item_id' => $orderItem->id,
+                'error' => $e->getMessage()
+            ]);
+            return back()->with('error', 'Gagal assign IMEI: ' . $e->getMessage());
+        }
     }
 }

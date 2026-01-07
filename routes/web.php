@@ -218,20 +218,31 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Online Orders Management
         Route::prefix('orders')->name('orders.')->group(function () {
+            // List & Detail
             Route::get('/', [ManajerOperasionalOrderController::class, 'index'])->name('index');
             Route::get('/{order}', [ManajerOperasionalOrderController::class, 'show'])->name('show');
+            
+            // === ASSIGN IMEI ROUTES (FIXED) ===
+            Route::get('/{order}/assign-imei/{orderItem}', [ManajerOperasionalOrderController::class, 'assignImei'])->name('assign-imei');
+            Route::post('/{order}/assign-imei/{orderItem}', [ManajerOperasionalOrderController::class, 'storeAssignedImei'])->name('store-imei');
+            
+            // Stock Pickup
             Route::post('/{order}/confirm-stock-pickup', [ManajerOperasionalOrderController::class, 'confirmStockPickup'])->name('confirm-stock-pickup');
             Route::post('/{order}/confirm-branch-pickup/{branchId}', [ManajerOperasionalOrderController::class, 'confirmBranchPickup'])->name('confirm-branch-pickup');
-            Route::put('/{order}/complete', [ManajerOperasionalOrderController::class, 'complete'])->name('complete');
-            Route::put('/{order}/cancel', [ManajerOperasionalOrderController::class, 'cancel'])->name('cancel');
-            Route::get('/{order}/print', [ManajerOperasionalOrderController::class, 'printInvoice'])->name('print');
+            
+            // Order Actions
+            Route::post('/{order}/complete', [ManajerOperasionalOrderController::class, 'complete'])->name('complete');
+            Route::post('/{order}/cancel', [ManajerOperasionalOrderController::class, 'cancel'])->name('cancel');
+            Route::post('/{order}/update-status', [ManajerOperasionalOrderController::class, 'updateStatus'])->name('update-status');
+            
+            // Branch Stock & Reallocation
             Route::get('/{order}/branch-stock/{branchId}', [ManajerOperasionalOrderController::class, 'getBranchStock'])->name('branch-stock');
             Route::post('/{order}/reallocate-stock', [ManajerOperasionalOrderController::class, 'reallocateStock'])->name('reallocate-stock');
-            Route::put('/{order}/update-status', [ManajerOperasionalOrderController::class, 'updateStatus'])->name('update-status');
-            Route::get('/orders/{order}/assign-imei',[OrderAssignController::class, 'show'])->name('assign-imei');
-            Route::post('/orders/items/{orderItem}/assign-imei',[OrderAssignController::class, 'assign'])->name('assign-imei.store');
+            
+            // Print
+            Route::get('/{order}/print', [ManajerOperasionalOrderController::class, 'printInvoice'])->name('print');
         });
-        
+            
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/sales', [SaleController::class, 'manajerSalesReport'])->name('sales');

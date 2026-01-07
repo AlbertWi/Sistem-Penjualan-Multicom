@@ -9,7 +9,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('orders.index') }}">Riwayat Pesanan</a>
+                        <a href="{{ route('customer.orders.index') }}">Riwayat Pesanan</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">{{ $order->order_number }}</li>
                 </ol>
@@ -136,9 +136,9 @@
                                         <div class="d-flex align-items-center">
                                             @if($item->product->images->first())
                                             <img src="{{ asset('storage/' . $item->product->images->first()->file_path) }}" 
-                                                 alt="{{ $item->product->name }}"
-                                                 class="rounded me-3"
-                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                                alt="{{ $item->product->name }}"
+                                                class="rounded me-3"
+                                                style="width: 50px; height: 50px; object-fit: cover;">
                                             @endif
                                             <div>
                                                 <strong>{{ $item->product->name }}</strong><br>
@@ -176,7 +176,7 @@
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('orders.index') }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('customer.orders.index') }}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Kembali
                         </a>
                         
@@ -188,7 +188,7 @@
                                     data-bs-target="#paymentModal">
                                 <i class="fas fa-credit-card me-2"></i>Bayar
                             </button>
-                            <form action="{{ route('orders.cancel', $order->id) }}" method="POST" class="d-inline">
+                            <form action="{{ route('customer.orders.cancel', $order->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('PUT')
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin membatalkan pesanan?')">
@@ -274,7 +274,7 @@
                 <h5 class="modal-title">Konfirmasi Pembayaran</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('orders.payment', $order->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('customer.orders.payment', $order->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">

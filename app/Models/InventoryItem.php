@@ -44,4 +44,8 @@ class InventoryItem extends Model
     {
         return $query->where('is_listed', true);
     }
+    public function orderItems()
+    {   
+        return $this->hasMany(OrderItem::class, 'inventory_item_id');
+    }
 }

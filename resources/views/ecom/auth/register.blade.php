@@ -7,7 +7,7 @@
     <div class="auth-container">
         <h3>Register</h3>
 
-        <form method="POST" action="{{ route('ecom.register') }}">
+        <form method="POST" action="{{ route('customer.register') }}">
             @csrf
 
             <div class="form-group">

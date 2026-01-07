@@ -12,6 +12,8 @@ class OrderItem extends Model
     protected $fillable = [
         'order_id',
         'product_id',
+        'inventory_item_id', 
+        'branch_id',
         'quantity',
         'price',
         'subtotal'
@@ -33,10 +35,10 @@ class OrderItem extends Model
     }
     public function inventoryItem()
     {
-        return $this->belongsTo(InventoryItem::class);
+        return $this->belongsTo(InventoryItem::class, 'inventory_item_id');
     }
     public function branch()
     {
-        return $this->belongsTo(InventoryItem::class);
+        return $this->belongsTo(Branch::class, 'branch_id');
     }
 }
