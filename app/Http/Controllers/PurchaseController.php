@@ -157,7 +157,11 @@ class PurchaseController extends Controller
                 $accessoryStock = \App\Models\AccessoryInventory::firstOrCreate([
                     'accessory_id' => $item['accessory_id'],
                     'branch_id' => $branchId,
-                ]);
+                ],
+                [
+                    'qty' => 0
+                ]
+            );
                 $accessoryStock->qty += $item['qty'];
                 $accessoryStock->save();
             }

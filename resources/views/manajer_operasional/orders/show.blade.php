@@ -134,7 +134,7 @@
                         <div class="card-body">
                             @foreach($itemsByBranch as $branchId => $items)
                                 @php
-                                    $branch = $items->first()->branch;
+                                    $branch = $order->branch;
                                     $statusCounts = $items->groupBy(function($item) {
                                         return $item->inventoryItem->status ?? 'unknown';
                                     });
@@ -144,7 +144,7 @@
                                     <div class="card-header bg-light">
                                         <h4 class="mb-0">
                                             <i class="fas fa-store mr-2"></i>
-                                            {{ $branch->name }}
+                                            {{ $branch?->name ?? 'Cabang tidak diketahui' }}
                                             <span class="badge badge-primary ml-2">{{ $items->count() }} items</span>
                                         </h4>
                                     </div>
@@ -214,8 +214,25 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            @if($order->status == 'pending' && $item->inventoryItem && $item->inventoryItem->status == 'reserved')
-                                                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            {{-- BELUM ASSIGN IMEI --}}
+                                                            @if(
+                                                                $order->payment_status === 'paid' &&
+                                                                $order->status === 'pending' &&
+                                                                !$item->inventoryItem
+                                                            )
+                                                                <a href="{{ route('manajer_operasional.orders.assign-imei', [$order->id, $item->id]) }}"
+                                                                class="btn btn-sm btn-warning">
+                                                                    <i class="fas fa-barcode"></i> Assign IMEI
+                                                                </a>
+                                                            @endif
+                                                            {{-- SUDAH ASSIGN, BOLEH REALLOCATE --}}
+                                                            @if(
+                                                                $order->status === 'pending' &&
+                                                                $item->inventoryItem &&
+                                                                $item->inventoryItem->status === 'reserved'
+                                                            )
+                                                                <button type="button"
+                                                                        class="btn btn-sm btn-outline-primary"
                                                                         onclick="showReallocationModal({{ $item->id }}, {{ $item->product_id }})">
                                                                     <i class="fas fa-exchange-alt"></i> Reallocate
                                                                 </button>
@@ -274,7 +291,7 @@
                                             <div class="form-group">
                                                 <label>Add Notes (Optional)</label>
                                                 <textarea name="notes" class="form-control" rows="2" 
-                                                          placeholder="Add notes about stock pickup..."></textarea>
+                                                        placeholder="Add notes about stock pickup..."></textarea>
                                             </div>
                                             <button type="submit" class="btn btn-success btn-block">
                                                 <i class="fas fa-check-circle mr-2"></i> Confirm All Stock Pickup
@@ -283,12 +300,12 @@
                                         </form>
                                     @elseif($order->status == 'processing')
                                         <form action="{{ route('manajer_operasional.orders.complete', $order->id) }}" 
-                                              method="POST">
+                                            method="POST">
                                             @csrf
                                             <div class="form-group">
                                                 <label>Completion Notes</label>
                                                 <textarea name="notes" class="form-control" rows="2" 
-                                                          placeholder="Add completion notes..."></textarea>
+                                                        placeholder="Add completion notes..."></textarea>
                                             </div>
                                             <button type="submit" class="btn btn-primary btn-block">
                                                 <i class="fas fa-check-circle mr-2"></i> Mark as Completed

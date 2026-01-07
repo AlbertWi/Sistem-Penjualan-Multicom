@@ -6,11 +6,6 @@
 <div class="container">
     <h1 class="mb-4">Daftar Accessories</h1>
     <a href="{{ route('manajer_operasional.accessories.create') }}" class="btn btn-primary mb-3">+ Tambah Accessory</a>
-
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>

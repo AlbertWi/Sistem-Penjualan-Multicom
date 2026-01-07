@@ -27,6 +27,7 @@ use App\Http\Controllers\{
     ManagerProductController,
     ProductEcomController,
     ManajerOperasionalOrderController,
+    OrderAssignController
 };
 
 // ===========================================
@@ -227,6 +228,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{order}/branch-stock/{branchId}', [ManajerOperasionalOrderController::class, 'getBranchStock'])->name('branch-stock');
             Route::post('/{order}/reallocate-stock', [ManajerOperasionalOrderController::class, 'reallocateStock'])->name('reallocate-stock');
             Route::put('/{order}/update-status', [ManajerOperasionalOrderController::class, 'updateStatus'])->name('update-status');
+            Route::get('/orders/{order}/assign-imei',[OrderAssignController::class, 'show'])->name('assign-imei');
+            Route::post('/orders/items/{orderItem}/assign-imei',[OrderAssignController::class, 'assign'])->name('assign-imei.store');
         });
         
         // Reports

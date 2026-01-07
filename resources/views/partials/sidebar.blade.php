@@ -154,13 +154,6 @@
                                     @endif
                                 </a>
                             </li>
-                            <!-- Posting E-commerce -->
-                            <li class="nav-item">
-                                <a href="{{ route('manajer_operasional.ecom.listings') }}" class="nav-link {{ request()->is('manajer_operasional/ecom/listings*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-tags"></i>
-                                    <p>Posting E-commerce</p>
-                                </a>
-                            </li>
                         </ul>
                     </li>
                 @elseif(Auth::check() && Auth::user()->role === 'kepala_toko')

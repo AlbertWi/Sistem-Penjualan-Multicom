@@ -102,27 +102,24 @@ class CheckoutController extends Controller
             
             // Step 3: Buat Order Items & Update Inventory
             foreach ($cart as $productId => $item) {
-                foreach ($item['allocated_items'] as $inventoryItem) {
-                    // Update inventory status
-                    $inventoryItem->update([
-                        'status' => 'reserved',
-                        'is_listed' => false,
-                        'listed_at' => null
-                    ]);
-                    
-                    // Create order item untuk setiap inventory item (karena unique IMEI)
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $productId,
-                        'inventory_item_id' => $inventoryItem->id,
-                        'branch_id' => $inventoryItem->branch_id,
-                        'quantity' => 1, // Karena 1 inventory item = 1 quantity
-                        'price' => $item['price'],
-                        'subtotal' => $item['price']
-                    ]);
-                }
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $productId,
+                    'quantity' => $item['qty'],
+                    'price' => $item['price'],
+                    'subtotal' => $item['price'] * $item['qty'],
+                ]);
+
             }
-            
+            InventoryItem::where('product_id', $productId)
+                ->where('status', 'in_stock')
+                ->where('is_listed', true)
+                ->limit($item['qty'])
+                ->update([
+                    'status' => 'reserved',
+                    'reserved_order_id' => $order->id
+                ]);
+
             // Step 4: Kosongkan cart
             session()->forget('cart');
             
@@ -281,4 +278,5 @@ class CheckoutController extends Controller
         return redirect()->route('orders.index')
             ->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
+    
 }

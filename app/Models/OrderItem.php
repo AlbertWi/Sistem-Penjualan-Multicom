@@ -31,4 +31,12 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function inventoryItem()
+    {
+        return $this->belongsTo(InventoryItem::class);
+    }
+    public function branch()
+    {
+        return $this->belongsTo(InventoryItem::class);
+    }
 }

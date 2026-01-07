@@ -1,6 +1,4 @@
 <?php
-
-// app/Http/Controllers/AccessoryController.php
 namespace App\Http\Controllers;
 
 use App\Models\Accessory;
@@ -27,7 +25,7 @@ class AccessoryController extends Controller
 
         Accessory::create($validated);
 
-        return redirect()->route('accessories.index')->with('success', 'Accessory berhasil ditambahkan.');
+        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil ditambahkan.');
     }
 
     public function edit(Accessory $accessory)
@@ -43,12 +41,12 @@ class AccessoryController extends Controller
 
         $accessory->update($validated);
 
-        return redirect()->route('accessories.index')->with('success', 'Accessory berhasil diperbarui.');
+        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil diperbarui.');
     }
 
     public function destroy(Accessory $accessory)
     {
         $accessory->delete();
-        return redirect()->route('accessories.index')->with('success', 'Accessory berhasil dihapus.');
+        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil dihapus.');
     }
 }
