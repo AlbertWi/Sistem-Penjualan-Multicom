@@ -206,18 +206,28 @@
         </div>
 
         {{-- Related Products (dummy) --}}
-        <div class="related-products-section">
-            <h2 class="related-title">You May Also Like</h2>
-            <div class="related-products-grid">
-                @foreach($relatedProducts ?? [] as $rel)
-                    <div class="related-product-card">
-                        <img src="{{ asset('storage/' . optional($rel->images->first())->file_path) }}">
-                        <h4>{{ $rel->name }}</h4>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
+        @if(($relatedProducts ?? collect())->count())
+            <section class="related-products-section">
+                <h3 class="related-title">You May Also Like</h3>
+                <div class="related-products-grid">
+                    @foreach($relatedProducts as $product)
+                        <div class="related-product-card">
+                            <a href="{{ route('catalog.show', $product->id) }}">
+                                <div class="related-image">
+                                    <img src="{{ asset('storage/' . optional($product->images->first())->file_path) }}">
+                                </div>
+                                <div class="related-info">
+                                    <div class="related-name">{{ $product->name }}</div>
+                                    <div class="related-price">
+                                        Rp {{ number_format($product->ecomSetting->ecom_price ?? 0) }}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 </div>
 @endsection

@@ -37,7 +37,23 @@ class CatalogController extends Controller
             ->where('status', 'in_stock')
             ->count();
 
-        return view('catalog.show', compact('product', 'stock'));
+        $relatedProducts = Product::with(['images', 'ecomSetting'])
+        ->where('id', '!=', $product->id)
+        ->whereHas('ecomSetting', function ($q) {
+            $q->where('is_listed', true);
+        })
+        ->whereHas('inventoryItems', function ($q) {
+            $q->where('status', 'in_stock');
+        })
+        ->inRandomOrder()
+        ->take(4)
+        ->get();
+
+        return view('catalog.show', compact(
+            'product',
+            'stock',
+            'relatedProducts'
+        ));
     }
 
 }

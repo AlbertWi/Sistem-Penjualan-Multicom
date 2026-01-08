@@ -1276,6 +1276,56 @@
             .hero-subtitle {
                 font-size: 16px;
             }
+            .related-products-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 30px;
+                justify-items: center;
+            }
+
+            .related-product-card {
+                width: 100%;
+                max-width: 240px;
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 5px 15px rgba(0,0,0,.08);
+                transition: .25s ease;
+                text-align: center;
+            }
+
+            .related-product-card:hover {
+                transform: translateY(-6px);
+            }
+
+            .related-image {
+                height: 220px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .related-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                padding: 10px;
+            }
+
+            .related-info {
+                padding: 15px;
+            }
+
+            .related-name {
+                font-size: 15px;
+                font-weight: 600;
+                margin-bottom: 6px;
+            }
+
+            .related-price {
+                color: var(--accent);
+                font-weight: 700;
+            }
         }
     </style>
 </head>

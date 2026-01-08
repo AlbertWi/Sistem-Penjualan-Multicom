@@ -29,9 +29,6 @@ class CartController extends Controller
         return view('cart.index', compact('cart', 'total'));
     }
 
-    /**
-     * Add item to cart with stock validation
-     */
     public function add(Request $request)
     {
         // Cek apakah request AJAX
@@ -66,6 +63,7 @@ class CartController extends Controller
             // Hitung stok tersedia
             $stock = $product->inventoryItems()
                 ->where('status', 'in_stock')
+                ->where('is_listed', true)
                 ->count();
             
             // Ambil cart saat ini
@@ -223,6 +221,7 @@ class CartController extends Controller
             
             $stock = $product->inventoryItems()
                 ->where('status', 'in_stock')
+                ->where('is_listed', true)
                 ->count();
             
             // Validasi stok
