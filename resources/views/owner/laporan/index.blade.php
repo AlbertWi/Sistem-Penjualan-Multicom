@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4>Laporan Penjualan Cabang</h4>
         @if (!empty($penjualan) && $penjualan->count())
-            <form method="GET" action="{{ route('sales.export-pdf') }}" style="display: inline;">
+            <form method="GET" action="{{ route('owner.sales.export-pdf') }}" style="display: inline;">
                 <input type="hidden" name="tanggal_awal" value="{{ $tanggalAwal }}">
                 <input type="hidden" name="tanggal_akhir" value="{{ $tanggalAkhir }}">
                 <input type="hidden" name="branch_id" value="{{ $branchId ?? '' }}">

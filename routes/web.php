@@ -222,9 +222,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/', [ManajerOperasionalOrderController::class, 'index'])->name('index');
             Route::get('/{order}', [ManajerOperasionalOrderController::class, 'show'])->name('show');
             
-            // === ASSIGN IMEI ROUTES (FIXED) ===
+            // === ASSIGN IMEI ROUTES===
             Route::get('/{order}/assign-imei/{orderItem}', [ManajerOperasionalOrderController::class, 'assignImei'])->name('assign-imei');
             Route::post('/{order}/assign-imei/{orderItem}', [ManajerOperasionalOrderController::class, 'storeAssignedImei'])->name('store-imei');
+            Route::post('{order}/reallocate-single', [ManajerOperasionalOrderController::class, 'reallocateSingleStock'])->name('reallocate-single');
             
             // Stock Pickup
             Route::post('/{order}/confirm-stock-pickup', [ManajerOperasionalOrderController::class, 'confirmStockPickup'])->name('confirm-stock-pickup');

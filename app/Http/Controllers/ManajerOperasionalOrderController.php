@@ -299,43 +299,65 @@ class  ManajerOperasionalOrderController extends Controller
     /**
      * Get branch stock for order item reallocation
      */
-    public function getBranchStock($orderId, $branchId)
-    {
-        $order = Order::with('items')->findOrFail($orderId);
-        
-        // Get all products in this order
-        $productIds = $order->items->pluck('product_id')->unique();
-        
-        // Get available inventory for these products in the specified branch
-        $availableStock = InventoryItem::whereIn('product_id', $productIds)
-            ->where('branch_id', $branchId)
-            ->where('status', 'in_stock')
-            ->where('is_listed', true)
-            ->with(['product', 'branch'])
-            ->get()
-            ->groupBy('product_id')
-            ->map(function ($items, $productId) {
-                $product = $items->first()->product;
-                return [
-                    'product_id' => $productId,
-                    'product_name' => $product->name,
-                    'product_brand' => $product->brand->name ?? '-',
-                    'available_count' => $items->count(),
-                    'items' => $items->take(5)->map(function ($item) {
-                        return [
-                            'id' => $item->id,
-                            'imei' => $item->imei,
-                            'sku' => $item->sku
-                        ];
-                    })
-                ];
-            });
+        public function getBranchStock($orderId, $branchId)
+        {
+            $order = Order::with('items')->findOrFail($orderId);
             
-        return response()->json([
-            'success' => true,
-            'data' => $availableStock
-        ]);
-    }
+            // Get all products in this order
+            $productIds = $order->items->pluck('product_id')->unique();
+            
+            // Query base
+            $query = InventoryItem::whereIn('product_id', $productIds)
+                ->where('status', 'in_stock')
+                ->where('is_listed', true)
+                ->with(['product', 'branch']);
+            
+            // Filter by branch if not 'all'
+            if ($branchId !== 'all') {
+                $query->where('branch_id', $branchId);
+            }
+            
+            $inventoryItems = $query->get();
+            
+            // Group by product and branch
+            $availableStock = [];
+            
+            foreach ($inventoryItems as $item) {
+                $productId = $item->product_id;
+                $branchId = $item->branch_id;
+                
+                if (!isset($availableStock[$productId])) {
+                    $availableStock[$productId] = [];
+                }
+                
+                if (!isset($availableStock[$productId][$branchId])) {
+                    $availableStock[$productId][$branchId] = [
+                        'product_id' => $productId,
+                        'product_name' => $item->product->name,
+                        'product_brand' => $item->product->brand->name ?? '-',
+                        'branch' => [
+                            'id' => $item->branch->id,
+                            'name' => $item->branch->name
+                        ],
+                        'count' => 0,
+                        'items' => []
+                    ];
+                }
+                
+                $availableStock[$productId][$branchId]['count']++;
+                $availableStock[$productId][$branchId]['items'][] = [
+                    'id' => $item->id,
+                    'imei' => $item->imei,
+                    'sku' => $item->sku,
+                    'status' => $item->status
+                ];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => $availableStock
+            ]);
+        }
     
     /**
      * Reallocate stock for order
@@ -395,7 +417,111 @@ class  ManajerOperasionalOrderController extends Controller
             ], 500);
         }
     }
-    
+    /**
+     * Reallocate single stock item
+     */
+    public function reallocateSingleStock(Request $request, $orderId)
+    {
+        $request->validate([
+            'order_item_id' => 'required|exists:order_items,id',
+            'inventory_item_id' => 'required|exists:inventory_items,id',
+            'notes' => 'nullable|string|max:500'
+        ]);
+        
+        $order = Order::with(['items.inventoryItem'])->findOrFail($orderId);
+        $orderItem = $order->items->find($request->order_item_id);
+        
+        if (!$orderItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order item not found.'
+            ], 404);
+        }
+        
+        // Check if the new inventory item is available
+        $newInventoryItem = InventoryItem::where('id', $request->inventory_item_id)
+            ->where('product_id', $orderItem->product_id)
+            ->where('status', 'in_stock')
+            ->where('is_listed', true)
+            ->first();
+        
+        if (!$newInventoryItem) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Selected inventory item is no longer available.'
+            ], 400);
+        }
+        
+        DB::beginTransaction();
+        try {
+            // Return old inventory item to stock if exists
+            if ($orderItem->inventoryItem) {
+                $orderItem->inventoryItem->update([
+                    'status' => 'in_stock',
+                    'is_listed' => true,
+                    'listed_at' => now()
+                ]);
+                
+                // Add reallocation log
+                Log::channel('inventory')->info('Inventory item returned to stock', [
+                    'inventory_item_id' => $orderItem->inventoryItem->id,
+                    'imei' => $orderItem->inventoryItem->imei,
+                    'reason' => 'Reallocation for order #' . $order->order_number
+                ]);
+            }
+            
+            // Update order item with new inventory
+            $orderItem->update([
+                'inventory_item_id' => $newInventoryItem->id,
+                'branch_id' => $newInventoryItem->branch_id
+            ]);
+            
+            // Mark new inventory as reserved
+            $newInventoryItem->update([
+                'status' => 'reserved',
+                'is_listed' => false,
+                'reserved_at' => now()
+            ]);
+            
+            // Add notes if provided
+            if ($request->notes) {
+                $currentNotes = $order->notes ? $order->notes . "\n" : '';
+                $order->update([
+                    'notes' => $currentNotes . "[Reallocation " . now()->format('Y-m-d H:i') . "] " . $request->notes
+                ]);
+            }
+            
+            DB::commit();
+            
+            Log::channel('order')->info('Stock reallocated', [
+                'order_id' => $order->id,
+                'order_item_id' => $orderItem->id,
+                'old_inventory' => $orderItem->inventoryItem ? $orderItem->inventoryItem->id : null,
+                'new_inventory' => $newInventoryItem->id,
+                'reallocated_by' => auth()->id(),
+                'notes' => $request->notes
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock successfully reallocated!',
+                'redirect' => route('manajer_operasional.orders.show', $orderId)
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Stock reallocation failed', [
+                'order_id' => $orderId,
+                'order_item_id' => $request->order_item_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reallocate stock: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * Print invoice
      */

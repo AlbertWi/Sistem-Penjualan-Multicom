@@ -134,7 +134,8 @@
                         <div class="card-body">
                             @foreach($itemsByBranch as $branchId => $items)
                                 @php
-                                    $branch = $order->branch;
+                                        $branch = $items->first()?->inventoryItem?->branch 
+                                                ?? $items->first()?->branch;
                                     $statusCounts = $items->groupBy(function($item) {
                                         return $item->inventoryItem->status ?? 'unknown';
                                     });
@@ -256,10 +257,10 @@
                                                 <div class="mt-3">
                                                     <form action="{{ route('manajer_operasional.orders.confirm-branch-pickup', [$order->id, $branchId]) }}" 
                                                           method="POST" 
-                                                          onsubmit="return confirm('Confirm stock pickup from {{ $branch->name }}?')">
+                                                          onsubmit="return confirm('Confirm stock pickup from {{ $branch?->name ?? 'Cabang tidak diketahui' }}?')">
                                                         @csrf
                                                         <button type="submit" class="btn btn-sm btn-success">
-                                                            <i class="fas fa-check mr-1"></i> Confirm Stock Pickup from {{ $branch->name }}
+                                                            <i class="fas fa-check mr-1"></i> Confirm Stock Pickup from {{ $branch?->name ?? 'Cabang tidak diketahui' }}
                                                         </button>
                                                         <small class="text-muted ml-2">({{ $branchItemsReserved }} items reserved)</small>
                                                     </form>
@@ -405,38 +406,71 @@ function showReallocationModal(orderItemId, productId) {
     $('#availableStockSelect').empty().append('<option value="">Loading...</option>');
     $('#inventoryDetails').empty();
     
-    // Fetch available stock
-    $.get(`{{ route('manajer_operasional.orders.branch-stock', [$order->id, 'BRANCH_ID']) }}`.replace('BRANCH_ID', 'all'), function(response) {
-        if (response.success && response.data[productId]) {
+    // Fetch available stock for ALL branches
+    $.get(`{{ route('manajer_operasional.orders.branch-stock', [$order->id, 'all']) }}`, function(response) {
+        if (response.success && response.data) {
             $('#availableStockSelect').empty().append('<option value="">Select inventory item...</option>');
             
-            const productData = response.data[productId];
-            productData.items.forEach(item => {
-                $('#availableStockSelect').append(
-                    `<option value="${item.id}" data-imei="${item.imei}" data-sku="${item.sku}">
-                        IMEI: ${item.imei} (SKU: ${item.sku})
-                    </option>`
-                );
-            });
-            
-            // Show inventory details
-            $('#inventoryDetails').html(`
-                <div class="alert alert-info mt-2">
-                    <strong>${productData.product_name}</strong> - ${productData.product_brand}<br>
-                    Available: ${productData.available_count} units
-                </div>
-            `);
+            // Filter untuk product yang dipilih
+            if (response.data[productId]) {
+                const productData = response.data[productId];
+                
+                // Loop melalui semua branch yang memiliki stok
+                Object.keys(productData).forEach(branchId => {
+                    const branchStock = productData[branchId];
+                    
+                    // Loop melalui items di branch ini
+                    branchStock.items.forEach(item => {
+                        $('#availableStockSelect').append(
+                            `<option value="${item.id}" 
+                                    data-branch-id="${branchId}"
+                                    data-imei="${item.imei}" >
+                                IMEI ${item.imei} (${branchStock.branch.name})
+                            </option>`
+                        );
+                    });
+                });
+                
+                // Hitung total available
+                let totalAvailable = 0;
+                Object.values(productData).forEach(branchStock => {
+                    totalAvailable += branchStock.count;
+                });
+                
+                // Show inventory details
+                $('#inventoryDetails').html(`
+                    <div class="alert alert-info mt-2">
+                        <strong>${productData[Object.keys(productData)[0]].product_name}</strong><br>
+                        Available: ${totalAvailable} units across ${Object.keys(productData).length} branches
+                    </div>
+                `);
+            } else {
+                $('#availableStockSelect').empty().append('<option value="">No available stock found for this product</option>');
+            }
         } else {
             $('#availableStockSelect').empty().append('<option value="">No available stock found</option>');
         }
+    }).fail(function() {
+        $('#availableStockSelect').empty().append('<option value="">Error loading stock data</option>');
     });
     
     $('#reallocationModal').modal('show');
 }
 
 function submitReallocation() {
-    const formData = $('#reallocationForm').serialize();
-    const url = '{{ route("manajer_operasional.orders.reallocate-stock", $order->id) }}';
+    const formData = {
+        'order_item_id': $('#reallocOrderItemId').val(),
+        'inventory_item_id': $('#availableStockSelect').val(),
+        'notes': $('textarea[name="notes"]').val(),
+        '_token': '{{ csrf_token() }}'
+    };
+    
+    if (!formData.inventory_item_id) {
+        alert('Please select an inventory item');
+        return;
+    }
+    
+    const url = '{{ route("manajer_operasional.orders.reallocate-single", $order->id) }}';
     
     $.ajax({
         url: url,
@@ -444,14 +478,23 @@ function submitReallocation() {
         data: formData,
         success: function(response) {
             if (response.success) {
+                $('#reallocationModal').modal('hide');
                 alert('Stock reallocated successfully!');
-                location.reload();
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else {
+                    location.reload();
+                }
             } else {
                 alert('Failed to reallocate stock: ' + response.message);
             }
         },
-        error: function() {
-            alert('An error occurred. Please try again.');
+        error: function(xhr) {
+            let message = 'An error occurred. Please try again.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            alert(message);
         }
     });
 }
