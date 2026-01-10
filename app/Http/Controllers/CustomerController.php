@@ -24,7 +24,7 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'name'           => 'required|string|max:191',
             'phone'          => 'nullable|string|max:20',
-            'jenis_kelamin'  => 'nullable|in:L,P',
+            'jenis_kelamin'  => 'nullable|in:pria,wanita',
             'tanggal_lahir'  => 'nullable|date',
             'email'          => 'nullable|email|unique:customers,email',
             'password'       => 'nullable|min:6',
@@ -66,11 +66,5 @@ class CustomerController extends Controller
         return redirect()
             ->route('manajer_operasional.customers.index')
             ->with('success', 'Customer berhasil diperbarui.');
-    }
-
-    public function destroy(Customer $customer)
-    {
-        $customer->delete();
-        return redirect()->route('customers.index')->with('success', 'Customer berhasil dihapus.');
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductEcomSetting extends Model
 {
-    protected $fillable = ['product_id', 'is_listed', 'ecom_price'];
+    protected $fillable = ['product_id', 'branch_id','is_listed', 'ecom_price'];
 
     public function product()
     {

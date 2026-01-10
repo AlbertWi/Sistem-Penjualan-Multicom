@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductEcomSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductEcomController extends Controller
 {
@@ -18,23 +19,40 @@ class ProductEcomController extends Controller
             'ecom_price' => 'required|numeric|min:0',
             'is_listed'  => 'nullable|boolean',
         ]);
+        $branchId = Auth::user()->branch_id;
+        if (!$branchId) {
+            return back()->withErrors([
+                'error' => 'Cabang user tidak ditemukan. Silakan login ulang.'
+            ]);
+        }
         // ambil atau buat setting ecom per produk
         $setting = ProductEcomSetting::firstOrCreate(
-            ['product_id' => $product->id],
+            [
+                'product_id' => $product->id,
+                'branch_id'  => $branchId,
+            ],
             [
                 'ecom_price' => 0,
                 'is_listed'  => false,
             ]
         );
-        // update data  
+        $wasListed = $setting->is_listed;
+        $isListed = $request->has('is_listed') ? (bool) $request->is_listed : $setting->is_listed;
+
         $setting->update([
             'ecom_price' => $request->ecom_price,
             'is_listed'  => $request->has('is_listed')
                 ? (bool) $request->is_listed
                 : $setting->is_listed,
         ]);
-
-        return back()->with('success', 'Produk e-commerce berhasil diperbarui');
+        if ($wasListed == false && $isListed == true) {
+            $message = 'Produk berhasil di-post ke e-commerce';
+        } elseif ($wasListed == true && $isListed == false) {
+            $message = 'Produk berhasil di-unpost dari e-commerce';
+        } else {
+            $message = 'Produk e-commerce berhasil diperbarui';
+        }
+        return back()->with('success', $message);
     }
     
 }

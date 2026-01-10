@@ -41,7 +41,7 @@
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.types.index') }}" class="nav-link {{ request()->is('manajer_operasional/types*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-mobile-alt"></i>
-                                    <p>Tipe</p>
+                                    <p>Type</p>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -59,7 +59,7 @@
                             <li class="nav-item">
                                 <a href="{{ route('manajer_operasional.inventory.editPrice') }}" class="nav-link {{ request()->is('manajer_operasional/inventory/edit-price*') ? 'active' : '' }}">
                                     <i class="nav-icon fas fa-money-bill-wave text-warning"></i>
-                                    <p>Edit Harga Beli</p>
+                                    <p>Edit Harga Produk</p>
                                 </a>
                             </li>
                         </ul>
@@ -188,7 +188,7 @@
                     <li class="nav-item">
                         <a href="{{ route('stok-cabang') }}" class="nav-link {{ request()->is('stok-cabang*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-boxes"></i>
-                            <p>Overview Stok</p>
+                            <p>Stok Cabang</p>
                         </a>
                     </li>
 
@@ -243,35 +243,9 @@
                         <a href="{{ route('owner.sales.index') }}"
                         class="nav-link {{ request()->is('owner/sales*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-cash-register"></i>
-                            <p>Penjualan</p>
+                            <p>Edit Penjualan</p>
                         </a>
                     </li>
-
-                    <!-- E-COMMERCE (Owner) -->
-                    <li class="nav-item has-treeview {{ request()->is('owner/ecom*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ request()->is('owner/ecom*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-globe"></i>
-                            <p>
-                                E-Commerce
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.ecom.overview') }}" class="nav-link {{ request()->is('owner/ecom/overview*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-chart-line"></i>
-                                    <p>Overview E-commerce</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.ecom.orders') }}" class="nav-link {{ request()->is('owner/ecom/orders*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-shopping-bag"></i>
-                                    <p>Pesanan Online</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
                     <!-- LAPORAN & ANALITIK -->
                     <li class="nav-item has-treeview {{ request()->is('owner/laporan*', 'owner/stocksReport*', 'owner/reports*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ request()->is('owner/laporan*', 'owner/stocksReport*', 'owner/reports*') ? 'active' : '' }}">
@@ -294,16 +268,9 @@
                                     <p>Laporan Stok</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.reports.financial') }}" class="nav-link {{ request()->is('owner/reports/financial*') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                                    <p>Laporan Keuangan</p>
-                                </a>
-                            </li>
                         </ul>
                     </li>
                 @endif
-
                 <!-- LOGOUT -->
                 <li class="nav-item">
                     <a href="{{ route('logout.admin') }}" class="nav-link" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

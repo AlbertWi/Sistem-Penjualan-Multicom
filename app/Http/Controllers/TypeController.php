@@ -35,6 +35,8 @@ class TypeController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:types,name,' . $type->id,
             'brand_id' => 'required|exists:brands,id',
+        ],[
+            'name.required' => 'Nama Type harus diisi.',
         ]);
 
         $type->update([

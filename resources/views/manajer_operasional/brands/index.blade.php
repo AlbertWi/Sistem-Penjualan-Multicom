@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Brand')
+@section('title', 'Daftar Merek')
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4">Daftar Brand</h1>
+    <h1 class="mb-4">Daftar Merek</h1>
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createBrandModal">
-        + Tambah Brand
+        + Tambah Merek
     </button>
     <!-- Modal Tambah Brand -->
     <div class="modal fade" id="createBrandModal" tabindex="-1" aria-labelledby="createBrandLabel" aria-hidden="true">
@@ -15,7 +15,7 @@
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="createBrandLabel">Tambah Brand Baru</h5>
+                        <h5 class="modal-title" id="createBrandLabel">Tambah Merek Baru</h5>
                     </div>
                     <div class="modal-body">
                         @if ($errors->any() && !old('_method'))
@@ -28,9 +28,9 @@
                             </div>
                         @endif
                         <div class="mb-3">
-                            <label for="name" class="form-label">Nama Brand</label>
+                            <label for="name" class="form-label">Nama Merek</label>
                             <input type="text" class="form-control @error('name') @if(!old('_method')) is-invalid @endif @enderror" 
-                                id="name" name="name" value="{{ old('name') }}" placeholder="Masukkan nama brand">
+                                id="name" name="name" value="{{ old('name') }}" placeholder="Masukkan Nama Merek">
                             @error('name')
                                 @if(!old('_method'))
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -52,7 +52,7 @@
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
-                <th>Nama Brand</th>
+                <th>Nama Merek</th>
                 <th>Dibuat Pada</th>
                 <th>Aksi</th>
             </tr>
@@ -79,7 +79,7 @@
                             @method('PUT')
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="editBrandLabel{{ $brand->id }}">Edit Brand</h5>
+                                    <h5 class="modal-title" id="editBrandLabel{{ $brand->id }}">Edit Merek</h5>
                                 </div>
                                 <div class="modal-body">
                                     @if ($errors->any() && old('_method') == 'PUT' && old('brand_id') == $brand->id)
@@ -92,7 +92,7 @@
                                         </div>
                                     @endif
                                     <div class="mb-3">
-                                        <label for="name{{ $brand->id }}" class="form-label">Nama Brand</label>
+                                        <label for="name{{ $brand->id }}" class="form-label">Nama Merek</label>
                                         <input type="text" class="form-control @error('name') @if(old('_method') == 'PUT' && old('brand_id') == $brand->id) is-invalid @endif @enderror" 
                                             id="name{{ $brand->id }}" name="name" value="{{ old('name', $brand->name) }}">
                                         @error('name')
@@ -115,7 +115,7 @@
 
             @empty
                 <tr>
-                    <td colspan="4">Belum ada data Brand.</td>
+                    <td colspan="4">Belum ada data Merek.</td>
                 </tr>
             @endforelse
         </tbody>

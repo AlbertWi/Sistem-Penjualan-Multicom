@@ -12,6 +12,7 @@ use App\Models\InventoryItem;
 use App\Models\Inventory;
 use App\Models\Accessory;
 use App\Models\AccessoryBranchPrice;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -41,7 +42,7 @@ class PurchaseController extends Controller
                   ->from('purchase_items')
                   ->groupBy('product_id');
             })
-            ->pluck('price', 'product_id'); // hasil: [product_id => last_price]
+            ->pluck('price', 'product_id');
     
         return view('purchases.create', compact('suppliers', 'products', 'accessories', 'lastPrices'));
     }
@@ -189,64 +190,64 @@ class PurchaseController extends Controller
     }
 
 
-    public function saveImei(Request $request, Purchase $purchase)
-    {
-        $imeis = $request->input('imeis', []);
-        $inventories = $purchase->items->flatMap(fn ($item) => $item->inventoryItems);
-        $errorMessages = [];
-    
-        foreach ($inventories as $inventory) {
-    
-            $inputImei = trim($imeis[$inventory->id] ?? '');
-    
-            if (!$inputImei) continue;
-    
-            // ========== FIX TERPENTING ==========
-            // Jika IMEI sama dengan yang sudah tersimpan → jangan update
-            if ($inventory->imei === $inputImei) {
+public function saveImei(Request $request, Purchase $purchase)
+{
+    $imeis = $request->input('imeis', []);
+    $inventories = $purchase->items->flatMap(fn ($item) => $item->inventoryItems);
+    $errorMessages = [];
+
+    foreach ($inventories as $inventory) {
+        $inputImei = trim($imeis[$inventory->id] ?? '');
+        if (!$inputImei) continue;
+
+        // kalau IMEI sama, skip
+        if ($inventory->imei === $inputImei) continue;
+
+        $currentProductId = $inventory->product_id;
+
+        // cek IMEI di inventory lain
+        $existing = InventoryItem::where('imei', $inputImei)
+            ->where('id', '!=', $inventory->id)
+            ->first();
+
+        if ($existing) {
+
+            // CASE 1: masih in_stock
+            if ($existing->status === 'in_stock') {
+                $errorMessages[] = "IMEI $inputImei sudah terdaftar di stok dan tidak boleh digunakan.";
                 continue;
             }
-    
-            $currentProductId = $inventory->product_id;
-    
-            // Cek apakah IMEI pernah ada di inventory lain
-            $existing = InventoryItem::where('imei', $inputImei)
-                ->where('id', '!=', $inventory->id)
-                ->first();
-    
-            if ($existing) {
-    
-                // CASE 1: IMEI masih in_stock (belum pernah dijual)
-                if ($existing->status == 'in_stock') {
-                    $errorMessages[] = "IMEI $inputImei sudah terdaftar di stok dan tidak boleh digunakan lagi.";
-                    continue;
-                }
-    
-                // CASE 2: Sudah SOLD tapi produk berbeda
-                if ($existing->product_id != $currentProductId) {
-                    $errorMessages[] = "IMEI $inputImei pernah digunakan di produk berbeda dan tidak bisa dipakai ulang.";
-                    continue;
-                }
-    
-                // CASE 3: Sudah SOLD dan produk sama → BOLEH
-            }
-    
-            try {
-                $inventory->imei = $inputImei;
-                $inventory->save();
-            } catch (\Exception $e) {
-                \Log::error('Gagal simpan IMEI: ' . $e->getMessage());
-                $errorMessages[] = "Gagal menyimpan IMEI {$inputImei}: {$e->getMessage()}";
+
+            // CASE 2: sold tapi beda produk
+            if ($existing->product_id != $currentProductId) {
+                $errorMessages[] = "IMEI $inputImei pernah digunakan di produk lain.";
+                continue;
             }
         }
-    
-        if (!empty($errorMessages)) {
-            return redirect()->back()->withErrors($errorMessages)->withInput();
+
+        try {
+            // simpan IMEI
+            $inventory->update([
+                'imei' => $inputImei
+            ]);
+        } catch (QueryException $e) {
+            if ($e->errorInfo[1] == 1062) {
+                $errorMessages[] = "IMEI $inputImei sudah terdaftar di stok dan tidak boleh digunakan.";
+            } else {
+                $errorMessages[] = "Gagal menyimpan IMEI $inputImei.";
+            }
         }
-    
-        return redirect()->route('purchases.index')->with('success', 'IMEI berhasil disimpan.');
     }
 
+    // kalau ada error → tampilkan pesan custom (BUKAN error DB)
+    if (!empty($errorMessages)) {
+        return back()->withErrors($errorMessages);
+    }
+
+    return redirect()
+        ->route('purchases.index')
+        ->with('success', 'Semua IMEI berhasil disimpan.');
+}
 
 
     public function ownerIndex(Request $request)

@@ -12,7 +12,7 @@
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
-                <th>Brand</th>
+                <th>Merek</th>
                 <th>Nama Type</th>
                 <th>Aksi</th>
             </tr>
@@ -41,7 +41,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="mb-3">
-                                        <label>Brand</label>
+                                        <label>Merek</label>
                                         <select name="brand_id" class="form-control">
                                             @foreach($brands as $brand)
                                                 <option value="{{ $brand->id }}" {{ $brand->id == $type->brand_id ? 'selected' : '' }}>
@@ -104,9 +104,9 @@
                         </div>
                     @endif
                     <div class="mb-2">
-                        <label>Brand</label>
+                        <label>Merek</label>
                         <select name="brand_id" id="brandSelect" class="form-control">
-                            <option value="">-- Pilih Brand --</option>
+                            <option value="">-- Pilih Merek --</option>
                             @foreach($brands as $brand)
                                 <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">
                                     {{ $brand->name }}

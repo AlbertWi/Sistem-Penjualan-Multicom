@@ -9,7 +9,17 @@ class InventoryItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['branch_id', 'product_id', 'imei', 'purchase_item_id', 'status','purchase_price','inventory_id','ecom_price', 'is_listed', 'listed_at',];
+    protected $fillable = [
+        'branch_id', 
+        'product_id', 
+        'imei', 
+        'purchase_item_id', 
+        'status',
+        'purchase_price',
+        'inventory_id',
+        'ecom_price', 
+        'is_listed', 
+        'listed_at',];
 
     public function branch() {
         return $this->belongsTo(Branch::class);

@@ -11,16 +11,6 @@
             <!-- Tombol Tambah Penjualan -->
             <a href="{{ route('sales.create') }}" class="btn btn-primary me-2">+ Tambah Penjualan</a>
 
-            <!-- Tombol Search Nota -->
-            <button class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#searchNotaModal">
-                🔍 Cari Nota
-            </button>
-
-            <!-- Tombol Find IMEI -->
-            <button class="btn btn-info me-2" data-bs-toggle="modal" data-bs-target="#findImeiModal">
-                📱 Find IMEI
-            </button>
-
             <!-- Tombol Print -->
             <a href="{{ route('sales.print', $sale->id) }}" target="_blank" class="btn btn-success me-2">
                 🖨️ Print Nota

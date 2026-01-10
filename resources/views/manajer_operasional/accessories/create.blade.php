@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    <h4 class="mb-4">Tambah Accessory</h4>
+    <h4 class="mb-4">Tambah Aksesoris</h4>
 
     @if ($errors->any())
         <div class="alert alert-danger">

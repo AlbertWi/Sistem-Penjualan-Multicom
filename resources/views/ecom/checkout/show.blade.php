@@ -287,9 +287,7 @@
                         <select name="payment_method" id="payment_method" class="form-select" required>
                             <option value="">Pilih metode...</option>
                             <option value="transfer">Transfer Bank</option>
-                            <option value="cash">Cash</option>
                             <option value="qris">QRIS</option>
-                            <option value="ewallet">E-Wallet</option>
                         </select>
                     </div>
                     

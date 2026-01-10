@@ -5,11 +5,15 @@
 @section('content')
 <div class="container-fluid">
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Daftar Customer</h4>
-            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createCustomerModal">
-                <i class="fas fa-plus"></i> Tambah Customer
-            </button>
+        <div class="card-header">
+            <h4 class="card-title mb-0">Daftar Customer</h4>
+            <div class="card-tools">
+                <button class="btn btn-primary btn-sm"
+                    data-toggle="modal"
+                    data-target="#createCustomerModal">
+                    <i class="fas fa-plus"></i> Tambah Customer
+                </button>
+            </div>
         </div>
 
 
@@ -40,14 +44,6 @@
                                     <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editCustomerModal{{ $customer->id }}">
                                         <i class="fas fa-edit"></i>
                                     </button>
-
-                                    <!-- Tombol Hapus -->
-                                    <form action="{{ route('manajer_operasional.customers.destroy', $customer->id) }}" method="POST" class="d-inline"
-                                        onsubmit="return confirm('Yakin ingin menghapus customer ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                                    </form>
                                 </td>
                             </tr>
 
@@ -103,7 +99,7 @@
                                                     {{-- Jenis Kelamin --}}
                                                     <div class="form-group">
                                                         <label>Jenis Kelamin</label>
-                                                        <select name="jenis_kelamin" class="form-control">
+                                                        <select name="jenis_kelamin" class="form-control" required>
                                                             <option value="">- Pilih -</option>
                                                             <option value="pria" {{ $customer->jenis_kelamin == 'L' ? 'selected' : '' }}>
                                                                 Pria
@@ -151,7 +147,7 @@
                             </div>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">Belum ada customer</td>
+                                <td colspan="7" class="text-center">Belum ada customer</td>
                             </tr>
                         @endforelse
                     </tbody>
