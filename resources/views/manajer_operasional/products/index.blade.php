@@ -19,10 +19,32 @@
                 + Tambah Produk
             </button>
 
-            <form method="GET" action="{{ route('manajer_operasional.products.index') }}" class="d-flex" style="max-width: 300px;">
-                <input type="text" name="q" class="form-control me-2" placeholder="Cari nama produk..." value="{{ request('q') }}">
-                <button type="submit" class="btn btn-primary">Cari</button>
+            <form method="GET"
+                action="{{ route('manajer_operasional.products.index') }}"
+                class="d-flex gap-2"
+                style="max-width: 500px;">
+
+                <input type="text"
+                    name="q"
+                    class="form-control"
+                    placeholder="Cari nama produk..."
+                    value="{{ request('q') }}">
+
+                <select name="status" class="form-control">
+                    <option value="">Semua</option>
+                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>
+                        Aktif
+                    </option>
+                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
+                        Nonaktif
+                    </option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    Cari
+                </button>
             </form>
+
         </div>
 
         <table class="table table-bordered table-striped">
@@ -53,14 +75,32 @@
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->brand->name ?? '-' }}</td>
                         <td>{{ $product->type->name ?? '-' }}</td>
+                        <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1">
 
-                        <td>
-                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editProductModal{{ $product->id }}">
+                            {{-- EDIT --}}
+                            <button class="btn btn-sm btn-warning"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editProductModal{{ $product->id }}">
                                 Edit
                             </button>
-                        </td>
-                    </tr>
 
+                            {{-- AKTIF / NONAKTIF --}}
+                            <form method="POST"
+                                action="{{ route('manajer_operasional.products.toggle-status', $product->id) }}"
+                                onsubmit="return confirm('Yakin ingin {{ $product->is_active ? 'menonaktifkan' : 'mengaktifkan' }} produk ini?')"
+                                class="d-inline">
+                                @csrf
+                                @method('PATCH')
+
+                                <button type="submit"
+                                    class="btn btn-sm {{ $product->is_active ? 'btn-danger' : 'btn-success' }}">
+                                    {{ $product->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    </tr>
                     <!-- Modal Edit -->
                     <div class="modal fade" id="editProductModal{{ $product->id }}" tabindex="-1">
                         <div class="modal-dialog">
@@ -196,7 +236,9 @@
     <!-- Modal Tambah Produk -->
     <div class="modal fade" id="createProductModal" tabindex="-1">
         <div class="modal-dialog">
-            <form action="{{ route('manajer_operasional.products.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('manajer_operasional.products.store') }}"
+                method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <div class="modal-content">
 
@@ -206,103 +248,138 @@
 
                     <div class="modal-body">
 
+                        {{-- FOTO --}}
                         <div class="mb-2">
                             <label>Foto Produk</label>
-                            <input type="file" name="foto[]" multiple class="form-control">
+                            <input type="file" name="foto[]" multiple class="form-control"required>
+                            <small class="text-muted">Boleh lebih dari satu foto</small>
                         </div>
 
+                        {{-- BRAND --}}
                         <div class="mb-2">
                             <label>Brand</label>
-                            <select name="brand_id" id="brandSelect" class="form-control">
+                            <select name="brand_id" id="brandSelect" class="form-control" required>
                                 <option value="">-- Pilih Brand --</option>
                                 @foreach($brands as $brand)
-                                    <option value="{{ $brand->id }}" data-name="{{ $brand->name }}">
+                                    <option value="{{ $brand->id }}"
+                                            data-name="{{ $brand->name }}">
                                         {{ $brand->name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
+                        {{-- TYPE --}}
                         <div class="mb-2">
                             <label>Type</label>
-                            <select name="type_id" id="typeSelect" class="form-control">
+                            <select name="type_id" id="typeSelect" class="form-control" required>
                                 <option value="">-- Pilih Type --</option>
-                                @foreach($types as $type)
-                                    <option value="{{ $type->id }}" data-name="{{ $type->name }}">
-                                        {{ $type->name }}
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
+
+                        {{-- WARNA --}}
+                        <div class="mb-2">
+                            <label>Warna</label>
+                            <input type="text"
+                                name="warna"
+                                id="warnaInput"
+                                class="form-control"
+                                placeholder="Contoh: Hitam / Biru / Midnight Purple"
+                                required>
+                            <small class="text-muted">Gunakan nama warna yang umum</small>
+                        </div>
+
                         <div class="row">
+                            {{-- RAM --}}
                             <div class="col-md-6 mb-2">
                                 <label>RAM (GB)</label>
-                                <select name="ram" class="form-control" required>
-                                    <option value="">Pilih RAM</option>
-                                    @foreach([2,4,6,8,12,16,24,32] as $ram)
-                                        <option value="{{ $ram }}">{{ $ram }} GB</option>
-                                    @endforeach
-                                </select>
+                                <input type="number"
+                                    name="ram"
+                                    class="form-control"
+                                    placeholder="Contoh: 8"
+                                    min="1"
+                                    required>
+                                <small class="text-muted">Isi angka saja (GB)</small>
                             </div>
 
+                            {{-- ROM --}}
                             <div class="col-md-6 mb-2">
                                 <label>ROM (GB)</label>
-                                <select name="rom" class="form-control" required>
-                                    <option value="">Pilih ROM</option>
-                                    @foreach([32,64,128,256,512,1024] as $rom)
-                                        <option value="{{ $rom }}">{{ $rom }} GB</option>
-                                    @endforeach
-                                </select>
+                                <input type="number"
+                                    name="rom"
+                                    class="form-control"
+                                    placeholder="Contoh: 128"
+                                    min="8"
+                                    required>
                             </div>
 
+                            {{-- BATERAI --}}
                             <div class="col-md-6 mb-2">
                                 <label>Baterai (mAh)</label>
-                                <select name="baterai" class="form-control" required>
-                                    @foreach([4000,4500,5000,6000] as $bat)
-                                        <option value="{{ $bat }}">{{ $bat }} mAh</option>
-                                    @endforeach
-                                </select>
+                                <input type="number"
+                                    name="baterai"
+                                    class="form-control"
+                                    placeholder="Contoh: 5000"
+                                    min="1000"
+                                    required>
                             </div>
 
+                            {{-- LAYAR --}}
                             <div class="col-md-6 mb-2">
                                 <label>Ukuran Layar (inci)</label>
-                                <select name="ukuran_layar" class="form-control" required>
-                                    @foreach([5.5,6.1,6.5,6.7,6.8] as $layar)
-                                        <option value="{{ $layar }}">{{ $layar }}"</option>
-                                    @endforeach
-                                </select>
+                                <input type="number"
+                                    name="ukuran_layar"
+                                    class="form-control"
+                                    step="0.1"
+                                    placeholder="Contoh: 6.67"
+                                    min="4"
+                                    required>
                             </div>
 
+                            {{-- GARANSI --}}
                             <div class="col-md-6 mb-2">
                                 <label>Masa Garansi (bulan)</label>
-                                <select name="masa_garansi" class="form-control" required>
-                                    @foreach([6,12,18,24] as $garansi)
-                                        <option value="{{ $garansi }}">{{ $garansi }} Bulan</option>
-                                    @endforeach
-                                </select>
+                                <input type="number"
+                                    name="masa_garansi"
+                                    class="form-control"
+                                    placeholder="Contoh: 12"
+                                    min="0"
+                                    required>
                             </div>
 
+                            {{-- KAMERA --}}
                             <div class="col-md-6 mb-2">
                                 <label>Resolusi Kamera</label>
-                                <select name="resolusi_kamera" class="form-control" required>
-                                    @foreach(['12 MP','48 MP','50 MP','64 MP','108 MP'] as $kamera)
-                                        <option value="{{ $kamera }}">{{ $kamera }}</option>
-                                    @endforeach
-                                </select>
+                                <input type="text"
+                                    name="resolusi_kamera"
+                                    class="form-control"
+                                    placeholder="Contoh: 50 MP"
+                                    required>
                             </div>
 
+                            {{-- SIM --}}
                             <div class="col-md-6 mb-2">
                                 <label>Jumlah Slot SIM</label>
-                                <select name="jumlah_slot_sim" class="form-control" required>
-                                    <option value="1">1 SIM</option>
-                                    <option value="2">2 SIM</option>
-                                </select>
+                                <input type="number"
+                                    name="jumlah_slot_sim"
+                                    class="form-control"
+                                    placeholder="Contoh: 2"
+                                    min="1"
+                                    max="4"
+                                    required>
                             </div>
                         </div>
 
+                        {{-- NAMA PRODUK AUTO --}}
                         <div class="mb-2">
-                            <label>Nama Produk</label>
-                            <input type="text" name="name" id="productName" class="form-control">
+                            <label>Nama Produk (Otomatis)</label>
+                            <input type="text"
+                                name="name"
+                                id="productName"
+                                class="form-control">
+                            <small class="text-muted">
+                                Otomatis dari Brand + Type + Warna
+                            </small>
                         </div>
 
                     </div>
@@ -317,38 +394,40 @@
     </div>
 
 
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const brandSelect = document.getElementById('brandSelect');
             const typeSelect = document.getElementById('typeSelect');
+            const warnaInput   = document.getElementById('warnaInput');
             const productName = document.getElementById('productName');
 
             function updateProductName() {
                 const brand = brandSelect.selectedOptions[0]?.dataset.name || '';
                 const type = typeSelect.selectedOptions[0]?.dataset.name || '';
+                const warna = warnaInput.value || '';
 
-                productName.value = brand && type ? `${brand} ${type}` : '';
+                let name = `${brand} ${type} ${warna}`.trim();
+                productName.value = name.replace(/\s+/g, ' ');
             }
 
             brandSelect.addEventListener('change', function() {
                 fetch(`/ajax/types-by-brand/${brandSelect.value}`)
                     .then(res => res.json())
                     .then(data => {
-
                         typeSelect.innerHTML = `<option value="">-- Pilih Type --</option>`;
-
                         data.forEach(t => {
                             typeSelect.innerHTML += `
                                 <option value="${t.id}" data-name="${t.name}">
                                     ${t.name}
                                 </option>`;
                         });
-
                         updateProductName();
                     });
 
             });
             typeSelect.addEventListener('change', updateProductName);
+            warnaInput.addEventListener('input', updateProductName);
         });
     </script>
 

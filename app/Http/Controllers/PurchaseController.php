@@ -31,7 +31,7 @@ class PurchaseController extends Controller
     public function create()
     {
         $suppliers = Supplier::all();
-        $products = Product::all();
+        $products = Product::where('is_active', 1)->get();
         $accessories = Accessory::all();
     
         // Ambil harga terakhir untuk tiap produk

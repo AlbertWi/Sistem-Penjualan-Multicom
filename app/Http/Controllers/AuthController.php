@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Sale;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Models\InventoryItem;
 
 class AuthController extends Controller
@@ -83,12 +86,44 @@ class AuthController extends Controller
                                 })->filter(fn ($item) => $item['qty'] < 2)->values()
                         ];
                     })->filter(fn ($branch) => $branch['low_stocks']->isNotEmpty());
+                    /* ================= FILTER GRAFIK ================= */
+                    $filter = $request->filter ?? 'bulan';
+                    $year   = $request->year ?? now()->year;
+                    $month  = $request->month ?? now()->month;
+                    $date   = $request->date ?? now()->toDateString();
 
+                    $salesChartQuery = Sale::join('branches', 'branches.id', '=', 'sales.branch_id')
+                        ->select(
+                            'branches.name as branch',
+                            DB::raw('SUM(sales.total) as total')
+                        )
+                        ->groupBy('branches.name');
+
+                    if ($filter === 'tahun') {
+                        $salesChartQuery->whereYear('sales.created_at', $year);
+                    }
+
+                    if ($filter === 'bulan') {
+                        $salesChartQuery
+                            ->whereYear('sales.created_at', $year)
+                            ->whereMonth('sales.created_at', $month);
+                    }
+
+                    if ($filter === 'hari') {
+                        $salesChartQuery->whereDate('sales.created_at', $date);
+                    }
+
+                    $salesChart = $salesChartQuery->get();
                     return view('dashboard.owner', [
                         'totalStock' => \App\Models\InventoryItem::where('status', 'in_stock')->count(),
                         'totalBranches' => \App\Models\Branch::count(),
                         'totalAdmins' => \App\Models\User::whereIn('role', ['manajer_operasional', 'kepala_toko'])->count(),
                         'lowStocks' => $lowStocks,
+                        'salesChart' => $salesChart,
+                        'filter'     => $filter,
+                        'year'       => $year,
+                        'month'      => $month,
+                        'date'       => $date,
                     ]);
 
             default:

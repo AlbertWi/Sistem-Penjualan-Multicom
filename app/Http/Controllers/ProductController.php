@@ -16,15 +16,33 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = \App\Models\Product::with(['brand', 'type']);
-        if ($request->has('q') && $request->q !== '') {
+
+        // 🔍 Search nama produk
+        if ($request->filled('q')) {
             $keyword = $request->q;
             $query->where('name', 'LIKE', "%{$keyword}%");
         }
-        $products = $query->get();
+
+        // 🔄 Filter status aktif / nonaktif
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', 1);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', 0);
+            }
+        }
+
+        $products = $query->latest()->get();
+
         $brands = \App\Models\Brand::all();
-        $types = \App\Models\Type::all();
-        return view('manajer_operasional.products.index', compact('products','brands', 'types'));
+        $types  = \App\Models\Type::all();
+
+        return view(
+            'manajer_operasional.products.index',
+            compact('products', 'brands', 'types')
+        );
     }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -32,6 +50,7 @@ class ProductController extends Controller
             'brand_id' => 'required|string|max:255',
             'type_id' => 'required|exists:types,id',
             'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'warna'  => 'required|string|max:50',
             'ram' => 'required|integer',
             'rom' => 'required|integer',
             'baterai' => 'required|integer',
@@ -68,6 +87,10 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'brand_id' => 'required|string|max:255',
+            'type_id' => 'required|exists:types,id',
+            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'warna'  => 'required|string|max:50',
             'ram' => 'required|integer',
             'rom' => 'required|integer',
             'baterai' => 'required|integer',
@@ -127,5 +150,18 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Harga modal berhasil diperbarui!');
     }
 
+    public function toggleStatus(Product $product)
+    {
+        $product->update([
+            'is_active' => ! $product->is_active
+        ]);
+
+        return back()->with(
+            'success',
+            $product->is_active
+                ? 'Produk berhasil diaktifkan.'
+                : 'Produk berhasil dinonaktifkan (discontinue).'
+        );
+    }
 
 }

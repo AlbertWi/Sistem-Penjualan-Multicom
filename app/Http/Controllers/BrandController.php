@@ -38,7 +38,7 @@ class BrandController extends Controller
             'name' => $request->name
         ]);
 
-        return redirect()->route('brands.index')->with('success', 'Brand berhasil diperbarui.');
+        return redirect()->route('manajer_operasional.brands.index')->with('success', 'Brand berhasil diperbarui.');
     }
 
 }

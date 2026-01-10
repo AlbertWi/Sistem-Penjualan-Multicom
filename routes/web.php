@@ -184,6 +184,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('brands', BrandController::class);
         Route::resource('types', TypeController::class);
         Route::resource('products', ProductController::class);
+        Route::patch('/manajer-operasional/products/{product}/toggle-status',[ProductController::class, 'toggleStatus'])->name('products.toggle-status');
         Route::resource('accessories', AccessoryController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('customers', CustomerController::class);

@@ -11,10 +11,17 @@ class ManagerProductController extends Controller
     public function index(Request $request)
     {
         $q = $request->q;
+        $branchId = auth()->user()->branch_id;
 
-        $products = Product::with(['brand', 'ecomSetting'])
-            ->whereHas('inventoryItems', function ($q2) {
-                $q2->where('status', 'in_stock');
+        $products = Product::with([
+                'brand',
+                'ecomSetting' => function ($q) use ($branchId) {
+                    $q->where('branch_id', $branchId);
+                }
+            ])
+            ->whereHas('inventoryItems', function ($q2) use ($branchId) {
+                $q2->where('branch_id', $branchId)
+                   ->where('status', 'in_stock');
             })
             ->when($q, function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {
@@ -25,8 +32,9 @@ class ManagerProductController extends Controller
                 });
             })
             ->withCount([
-                'inventoryItems as stock_count' => function ($q) {
-                    $q->where('status', 'in_stock');
+                'inventoryItems as stock_count' => function ($q) use ($branchId) {
+                    $q->where('branch_id', $branchId)
+                      ->where('status', 'in_stock');
                 }
             ])
             ->latest()
@@ -38,13 +46,28 @@ class ManagerProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $branchId = auth()->user()->branch_id;
+
         $request->validate([
             'ecom_price' => 'required|numeric|min:0',
             'is_listed'  => 'nullable|boolean',
         ]);
 
+        // 🔒 Safety: pastikan stok ada di cabang manajer
+        $stock = $product->inventoryItems()
+            ->where('branch_id', $branchId)
+            ->where('status', 'in_stock')
+            ->count();
+
+        if ($stock <= 0) {
+            return back()->with('error', 'Stok produk di cabang anda kosong.');
+        }
+
         ProductEcomSetting::updateOrCreate(
-            ['product_id' => $product->id],
+            [
+                'product_id' => $product->id,
+                'branch_id'  => $branchId,
+            ],
             [
                 'ecom_price' => $request->ecom_price,
                 'is_listed'  => $request->boolean('is_listed'),

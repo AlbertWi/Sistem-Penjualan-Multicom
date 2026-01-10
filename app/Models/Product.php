@@ -13,6 +13,7 @@ class Product extends Model
     'name',
     'brand_id',
     'type_id',
+    'warna',
     'ram',
     'rom',
     'baterai',
@@ -20,6 +21,7 @@ class Product extends Model
     'masa_garansi',
     'resolusi_kamera',
     'jumlah_slot_sim',
+    'is_active',
     ];
 
     public function inventoryItems() {

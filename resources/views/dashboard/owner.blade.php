@@ -70,6 +70,87 @@
             <p class="text-muted">Tidak ada stok yang menipis.</p>
         @endif
     </div>
+        <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title">📊 Grafik Penjualan per Cabang</h5>
+        </div>
+        <div class="card-body">
+
+            {{-- FILTER --}}
+            <form method="GET" class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <select name="filter" class="form-control" onchange="this.form.submit()">
+                        <option value="hari"  {{ $filter=='hari' ? 'selected' : '' }}>Per Hari</option>
+                        <option value="bulan" {{ $filter=='bulan' ? 'selected' : '' }}>Per Bulan</option>
+                        <option value="tahun" {{ $filter=='tahun' ? 'selected' : '' }}>Per Tahun</option>
+                    </select>
+                </div>
+
+                @if($filter === 'hari')
+                    <div class="col-md-3">
+                        <input type="date" name="date" value="{{ $date }}" class="form-control">
+                    </div>
+                @endif
+
+                @if($filter === 'bulan')
+                    <div class="col-md-2">
+                        <select name="month" class="form-control">
+                            @for($m=1;$m<=12;$m++)
+                                <option value="{{ $m }}" {{ $month==$m?'selected':'' }}>
+                                    {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                @endif
+
+                @if($filter !== 'hari')
+                    <div class="col-md-2">
+                        <input type="number" name="year" class="form-control"
+                            value="{{ $year }}" min="2020" max="{{ now()->year }}">
+                    </div>
+                @endif
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">Terapkan</button>
+                </div>
+            </form>
+
+            <canvas id="salesChart" height="100"></canvas>
+        </div>
+    </div>
+
 </div>
 </div>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('salesChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: @json($salesChart->pluck('branch')),
+        datasets: [{
+            label: 'Total Penjualan (Rp)',
+            data: @json($salesChart->pluck('total')),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: val => 'Rp ' + val.toLocaleString('id-ID')
+                }
+            }
+        }
+    }
+});
+</script>
+@endpush
+
 @endsection

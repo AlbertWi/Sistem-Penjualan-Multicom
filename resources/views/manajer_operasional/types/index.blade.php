@@ -68,16 +68,6 @@
                                             </ul>
                                         </div>
                                     @endif
-                                    <div class="mb-3">
-                                        <label for="typeName{{ $type->id }}" class="form-label">Nama Type</label>
-                                        <input type="text" class="form-control @error('name') @if(old('_method') == 'PUT' && old('type_id') == $type->id) is-invalid @endif @enderror" 
-                                            id="typeName{{ $type->id }}" name="name" value="{{ old('name', $type->name) }}">
-                                        @error('name')
-                                            @if(old('_method') == 'PUT' && old('type_id') == $type->id)
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @endif
-                                        @enderror
-                                    </div>
                                     <!-- Hidden field untuk identifikasi type -->
                                     <input type="hidden" name="type_id" value="{{ $type->id }}">
                                 </div>

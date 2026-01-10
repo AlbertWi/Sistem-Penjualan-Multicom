@@ -36,4 +36,5 @@ class ProductEcomController extends Controller
 
         return back()->with('success', 'Produk e-commerce berhasil diperbarui');
     }
+    
 }
