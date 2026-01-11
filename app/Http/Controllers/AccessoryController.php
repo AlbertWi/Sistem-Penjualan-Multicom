@@ -25,7 +25,7 @@ class AccessoryController extends Controller
 
         Accessory::create($validated);
 
-        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil ditambahkan.');
+        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Aksesoris berhasil ditambahkan.');
     }
 
     public function edit(Accessory $accessory)
@@ -41,12 +41,6 @@ class AccessoryController extends Controller
 
         $accessory->update($validated);
 
-        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil diperbarui.');
-    }
-
-    public function destroy(Accessory $accessory)
-    {
-        $accessory->delete();
-        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Accessory berhasil dihapus.');
+        return redirect()->route('manajer_operasional.accessories.index')->with('success', 'Aksesoris berhasil diperbarui.');
     }
 }
