@@ -21,7 +21,7 @@ class ManagerProductController extends Controller
             ])
             ->whereHas('inventoryItems', function ($q2) use ($branchId) {
                 $q2->where('branch_id', $branchId)
-                   ->where('status', 'in_stock');
+                ->where('status', 'in_stock');
             })
             ->when($q, function ($query) use ($q) {
                 $query->where(function ($sub) use ($q) {

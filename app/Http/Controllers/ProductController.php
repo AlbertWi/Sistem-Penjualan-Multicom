@@ -57,7 +57,7 @@ class ProductController extends Controller
             'ukuran_layar' => 'required|numeric',
             'masa_garansi' => 'required|integer',
             'resolusi_kamera' => 'required|string',
-            'jumlah_slot_sim' => 'required|integer|in:1,2',
+            'jumlah_slot_sim' => 'required|integer',
         ],[
             'name.required' => 'Nama Produk harus diisi.',
             'brand_id.required' => 'Brand harus diisi.',
@@ -85,11 +85,12 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        $brands = \App\Models\Brand::all();
+        $types  = \App\Models\Type::all();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'brand_id' => 'required|string|max:255',
+            'brand_id' => 'required',
             'type_id' => 'required|exists:types,id',
-            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
             'warna'  => 'required|string|max:50',
             'ram' => 'required|integer',
             'rom' => 'required|integer',
@@ -97,13 +98,38 @@ class ProductController extends Controller
             'ukuran_layar' => 'required|numeric',
             'masa_garansi' => 'required|integer',
             'resolusi_kamera' => 'required|string',
-            'jumlah_slot_sim' => 'required|integer|in:1,2',
-        ],[
+            'jumlah_slot_sim' => 'required|integer',
+            'foto.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
             'name.required' => 'Nama Produk harus diisi.',
         ]);
+
+        // ✅ update data produk
         $product->update($validated);
-        return redirect()->route('manajer_operasional.products.index')->with('success', 'Product Berhasil Diperbarui');
+
+        // ✅ JIKA ADA FOTO BARU
+        if ($request->hasFile('foto')) {
+
+            // hapus foto lama (opsional tapi disarankan)
+            foreach ($product->images as $img) {
+                \Storage::disk('public')->delete($img->file_path);
+                $img->delete();
+            }
+
+            // simpan foto baru
+            foreach ($request->file('foto') as $file) {
+                $path = $file->store('products', 'public');
+
+                $product->images()->create([
+                    'file_path' => $path
+                ]);
+            }
+        }
+
+        return redirect()
+            ->route('manajer_operasional.products.index')->with('success', 'Produk berhasil diperbarui');
     }
+
     public function getLatestPrice(Product $product)
     {
         $lastPurchaseItem = $product->purchaseItems()->latest()->first();

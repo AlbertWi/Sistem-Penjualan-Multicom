@@ -63,7 +63,6 @@ class CartController extends Controller
             // Hitung stok tersedia
             $stock = $product->inventoryItems()
                 ->where('status', 'in_stock')
-                ->where('is_listed', true)
                 ->count();
             
             // Ambil cart saat ini

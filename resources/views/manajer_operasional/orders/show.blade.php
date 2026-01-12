@@ -181,7 +181,6 @@
                                                         <th>Price</th>
                                                         <th>Subtotal</th>
                                                         <th>Status</th>
-                                                        <th>Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -213,31 +212,6 @@
                                                             <span class="badge badge-{{ $statusColors[$status] ?? 'secondary' }}">
                                                                 {{ ucfirst(str_replace('_', ' ', $status)) }}
                                                             </span>
-                                                        </td>
-                                                        <td>
-                                                            {{-- BELUM ASSIGN IMEI --}}
-                                                            @if(
-                                                                $order->payment_status === 'paid' &&
-                                                                $order->status === 'pending' &&
-                                                                !$item->inventoryItem
-                                                            )
-                                                                <a href="{{ route('manajer_operasional.orders.assign-imei', [$order->id, $item->id]) }}"
-                                                                class="btn btn-sm btn-warning">
-                                                                    <i class="fas fa-barcode"></i> Assign IMEI
-                                                                </a>
-                                                            @endif
-                                                            {{-- SUDAH ASSIGN, BOLEH REALLOCATE --}}
-                                                            @if(
-                                                                $order->status === 'pending' &&
-                                                                $item->inventoryItem &&
-                                                                $item->inventoryItem->status === 'reserved'
-                                                            )
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-outline-primary"
-                                                                        onclick="showReallocationModal({{ $item->id }}, {{ $item->product_id }})">
-                                                                    <i class="fas fa-exchange-alt"></i> Reallocate
-                                                                </button>
-                                                            @endif
                                                         </td>
                                                     </tr>
                                                     @endforeach
@@ -389,10 +363,6 @@
                     
                     <div id="inventoryDetails"></div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="submitReallocation()">Reallocate</button>
             </div>
         </div>
     </div>

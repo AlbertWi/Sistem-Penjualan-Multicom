@@ -72,25 +72,6 @@
                 <div class="product-info">
                     <h3 class="product-name">{{ $product->name }}</h3>
 
-                    {{-- Rating dummy --}}
-                    <div class="product-rating">
-                        <div class="stars">
-                            @for($i = 1; $i <= 5; $i++)
-                                <svg width="16" height="16" viewBox="0 0 24 24"
-                                     fill="{{ $i <= 4 ? '#ffc107' : 'none' }}"
-                                     stroke="{{ $i <= 4 ? '#ffc107' : '#e0e0e0' }}"
-                                     stroke-width="2">
-                                    <polygon points="12 2 15.09 8.26 22 9.27
-                                                     17 14.14 18.18 21.02
-                                                     12 17.77 5.82 21.02
-                                                     7 14.14 2 9.27
-                                                     8.91 8.26 12 2"/>
-                                </svg>
-                            @endfor
-                        </div>
-                        <span class="review-count">(24)</span>
-                    </div>
-
                     {{-- Price --}}
                     <div class="product-price-wrapper">
                         <div class="product-price">

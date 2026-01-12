@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\InventoryItem;
+use App\Models\ProductEcomSetting;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -45,28 +46,25 @@ class CheckoutController extends Controller
             
             // Step 1: Validasi dan alokasi stok
             foreach ($cart as $productId => $item) {
-                // Cek stok tersedia di seluruh cabang
-                // PERBAIKAN: Tambahkan kondisi untuk cek stok yang belum direserve
+                $ecomSetting = ProductEcomSetting::where('product_id', $productId)
+                ->where('is_listed', true)
+                ->first();
+            
+                if (!$ecomSetting) {
+                    $product = Product::find($productId);
+                    throw new \Exception("Produk {$product->name} tidak tersedia untuk dijual.");
+                }
                 $availableItems = InventoryItem::with('branch')
                     ->where('product_id', $productId)
                     ->where('status', 'in_stock')
-                    ->where('is_listed', true)
-                    // PENTING: Pastikan tidak sudah direserve untuk order lain
                     ->whereDoesntHave('orderItems', function($query) {
                         $query->whereHas('order', function($q) {
                             $q->whereIn('status', ['pending', 'processing']);
                         });
                     })
                     ->orderBy('branch_id')
-                    ->limit($item['qty'] * 2) // Ambil lebih banyak untuk safety
+                    ->limit($item['qty'] * 2)
                     ->get();
-                
-                Log::info('Stock Check:', [
-                    'product_id' => $productId,
-                    'requested_qty' => $item['qty'],
-                    'available_count' => $availableItems->count(),
-                    'items' => $availableItems->pluck('id')->toArray()
-                ]);
                 
                 if ($availableItems->count() < $item['qty']) {
                     $product = Product::find($productId);
@@ -76,7 +74,6 @@ class CheckoutController extends Controller
                     );
                 }
                 
-                // Alokasi stok
                 $allocatedItems = [];
                 $remainingQty = $item['qty'];
                 
@@ -110,7 +107,8 @@ class CheckoutController extends Controller
                         'inventory_item' => $inventoryItem,
                         'product_id' => $productId,
                         'qty' => 1,
-                        'price' => $item['price']
+                        'price' => $item['price'],
+                        'ecom_setting' => $ecomSetting
                     ];
                 }
                 
@@ -125,6 +123,7 @@ class CheckoutController extends Controller
                 
                 // Simpan alokasi sementara
                 $item['allocated_items'] = $allocatedItems;
+                $item['ecom_setting'] = $ecomSetting; 
                 $cart[$productId] = $item;
                 $total += $item['price'] * $item['qty'];
             }
@@ -152,19 +151,13 @@ class CheckoutController extends Controller
                         'quantity' => 1, // 1 item = 1 inventory_item
                         'price' => $item['price'],
                         'subtotal' => $item['price'],
+                        'ecom_setting_id' => $item['ecom_setting']->id,
                     ]);
                     
                     // Update inventory status ke reserved
                     $inventoryItem->update([
                         'status' => 'reserved',
-                        'is_listed' => false,
                         'reserved_at' => now()
-                    ]);
-                    
-                    Log::info('Inventory reserved:', [
-                        'inventory_id' => $inventoryItem->id,
-                        'imei' => $inventoryItem->imei,
-                        'order_id' => $order->id
                     ]);
                 }
             }
@@ -174,29 +167,12 @@ class CheckoutController extends Controller
             
             DB::commit();
             
-            // Log activity
-            Log::channel('order')->info('Order created', [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-                'customer_id' => $customerId,
-                'total' => $total,
-                'items_count' => $order->items()->count(),
-                'branch_allocations' => array_keys($branchAllocations)
-            ]);
-            
             return redirect()->route('customer.orders.show', $order->id)
                 ->with('success', 'Pesanan berhasil dibuat!')
                 ->with('info', 'Silakan lakukan pembayaran untuk melanjutkan pesanan.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            Log::error('Checkout error:', [
-                'customer_id' => auth()->guard('customer')->id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
             return redirect()->route('cart.index')
                 ->with('error', 'Terjadi kesalahan saat checkout: ' . $e->getMessage());
         }
@@ -264,7 +240,6 @@ class CheckoutController extends Controller
                 if ($item->inventoryItem) {
                     $item->inventoryItem->update([
                         'status' => 'in_stock',
-                        'is_listed' => true,
                         'reserved_at' => null
                     ]);
                 }

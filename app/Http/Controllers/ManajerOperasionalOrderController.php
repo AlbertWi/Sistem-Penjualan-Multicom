@@ -101,7 +101,6 @@ class  ManajerOperasionalOrderController extends Controller
             if (!isset($availableInventory[$productId])) {
                 $availableInventory[$productId] = InventoryItem::where('product_id', $productId)
                     ->where('status', 'in_stock')
-                    ->where('is_listed', true)
                     ->with('branch')
                     ->get()
                     ->groupBy('branch_id')
