@@ -268,6 +268,12 @@
                                     <p>Laporan Stok</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.salesReport') }}" class="nav-link {{ request()->is('owner/laporan/penjualan*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-chart-bar"></i>
+                                    <p>Laporan Penjualan Online</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 @endif

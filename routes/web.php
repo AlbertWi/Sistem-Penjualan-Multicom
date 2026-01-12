@@ -27,7 +27,8 @@ use App\Http\Controllers\{
     ManagerProductController,
     ProductEcomController,
     ManajerOperasionalOrderController,
-    OrderAssignController
+    OrderAssignController,
+    OwnerReportController
 };
 
 // ===========================================
@@ -141,7 +142,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Management
         Route::resource('branches', BranchController::class);
         Route::resource('users', UserController::class);
-        
         // Sales Settlements
         Route::get('/sales', [SaleController::class, 'ownerIndex'])->name('sales.index');
         Route::get('/sales/{id}/edit', [SaleController::class, 'ownerEdit'])->name('sales.edit');
@@ -156,9 +156,11 @@ Route::middleware('auth:sanctum')->group(function () {
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/financial', [SaleController::class, 'financialReport'])->name('financial');
+            
         });
         
-        // Sales Reports
+        // Sales 
+        Route::get('/sales/report/ecommerce', [OwnerReportController::class, 'salesReport'])->name('salesReport');
         Route::get('/laporan-penjualan', [SaleController::class, 'laporanPenjualan'])->name('laporan.penjualan');
         Route::get('/sales/export-pdf', [SaleController::class, 'exportPdf'])->name('sales.export-pdf');
         
