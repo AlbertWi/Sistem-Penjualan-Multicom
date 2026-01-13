@@ -155,8 +155,7 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Reports
         Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('/financial', [SaleController::class, 'financialReport'])->name('financial');
-            
+                    Route::get('/owner/laporan/detail-cabang', [SaleController::class, 'detailCabang'])->name('sales.detail');
         });
         
         // Sales 

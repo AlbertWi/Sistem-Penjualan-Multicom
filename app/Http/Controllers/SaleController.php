@@ -324,13 +324,12 @@ class SaleController extends Controller
 
     public function laporanPenjualan(Request $request)
     {
-        $tanggalAwal = $request->tanggal_awal;
-        $tanggalAkhir = $request->tanggal_akhir;
+        $tanggalAwal = $request->tanggal_awal ?? now()->subDays(30)->format('Y-m-d');
+        $tanggalAkhir = $request->tanggal_akhir ?? now()->format('Y-m-d');
         $branchId = $request->branch_id;
-        $customerId = $request->customer_id;
         $brandId = $request->brand_id;
-    
-        // ambil query dengan eager load yang diperlukan
+
+        // Query untuk mendapatkan data penjualan
         $query = Sale::with([
             'items.product.brand',
             'items.inventoryItem',
@@ -339,8 +338,183 @@ class SaleController extends Controller
             'branch',
             'customer'
         ]);
-    
-        // Filter berdasarkan tanggal (jika keduanya diisi)
+
+        // Filter tanggal
+        if ($tanggalAwal && $tanggalAkhir) {
+            $query->whereBetween('created_at', [
+                Carbon::parse($tanggalAwal)->startOfDay(),
+                Carbon::parse($tanggalAkhir)->endOfDay(),
+            ]);
+        }
+
+        // Filter cabang
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
+        }
+
+        // Filter brand
+        if ($brandId) {
+            $query->whereHas('items.product', function ($q) use ($brandId) {
+                $q->where('brand_id', $brandId);
+            });
+        }
+
+        // Get all sales data
+        $sales = $query->orderBy('created_at', 'desc')->get();
+
+        // REKAP PER CABANG
+        $rekapCabang = [];
+        $totalSemua = [
+            'pendapatan' => 0,
+            'laba' => 0,
+            'jumlah_nota' => 0,
+            'jumlah_item' => 0,
+            'jumlah_customer' => 0
+        ];
+
+        // Kelompokkan data per cabang
+        $salesGroupedByBranch = $sales->groupBy('branch_id');
+
+        foreach ($salesGroupedByBranch as $branchId => $salesInBranch) {
+            $branch = $salesInBranch->first()->branch ?? null;
+            if (!$branch) continue;
+
+            $pendapatanCabang = 0;
+            $labaCabang = 0;
+            $jumlahNota = $salesInBranch->count();
+            $jumlahItem = 0;
+            $customers = collect();
+
+            foreach ($salesInBranch as $sale) {
+                // Hitung produk HP
+                foreach ($sale->items ?? [] as $item) {
+                    $hargaJual = floatval($item->price ?? 0);
+                    $hargaBeli = floatval($item->inventoryItem->purchase_price ?? 0);
+                    $pendapatanCabang += $hargaJual;
+                    $labaCabang += ($hargaJual - $hargaBeli);
+                    $jumlahItem++;
+                }
+
+                // Hitung accessories
+                foreach ($sale->accessories ?? [] as $acc) {
+                    $hargaJual = floatval($acc->price ?? 0);
+                    $hargaBeli = floatval($acc->purchaseAccessory->price ?? 0);
+                    $pendapatanCabang += $hargaJual;
+                    $labaCabang += ($hargaJual - $hargaBeli);
+                    $jumlahItem++;
+                }
+
+                // Kumpulkan customer unik
+                if ($sale->customer) {
+                    $customers->push($sale->customer_id);
+                }
+            }
+
+            // Hitung margin laba (dalam persen)
+            $marginLaba = $pendapatanCabang > 0 ? ($labaCabang / $pendapatanCabang) * 100 : 0;
+
+            $rekapCabang[] = [
+                'branch_id' => $branch->id,
+                'branch_name' => $branch->name,
+                'pendapatan' => $pendapatanCabang,
+                'laba' => $labaCabang,
+                'margin_laba' => $marginLaba,
+                'jumlah_nota' => $jumlahNota,
+                'jumlah_item' => $jumlahItem,
+                'jumlah_customer' => $customers->unique()->count(),
+                'avg_transaksi' => $jumlahNota > 0 ? $pendapatanCabang / $jumlahNota : 0,
+            ];
+
+            // Akumulasi total semua cabang
+            $totalSemua['pendapatan'] += $pendapatanCabang;
+            $totalSemua['laba'] += $labaCabang;
+            $totalSemua['jumlah_nota'] += $jumlahNota;
+            $totalSemua['jumlah_item'] += $jumlahItem;
+            $totalSemua['jumlah_customer'] += $customers->unique()->count();
+        }
+
+        // Urutkan cabang berdasarkan pendapatan (descending)
+        usort($rekapCabang, function($a, $b) {
+            return $b['pendapatan'] <=> $a['pendapatan'];
+        });
+
+        // Data untuk chart (grafik)
+        $chartData = [
+            'labels' => collect($rekapCabang)->pluck('branch_name')->toArray(),
+            'pendapatan' => collect($rekapCabang)->pluck('pendapatan')->toArray(),
+            'laba' => collect($rekapCabang)->pluck('laba')->toArray(),
+        ];
+
+        // Data untuk trend harian (7 hari terakhir)
+        $trendHarian = [];
+        $endDate = Carbon::parse($tanggalAkhir);
+        $startDate = Carbon::parse($tanggalAwal);
+        $daysDiff = $startDate->diffInDays($endDate) + 1;
+        $daysDiff = min($daysDiff, 30); // Maksimal 30 hari untuk chart
+
+        for ($i = 0; $i < $daysDiff; $i++) {
+            $date = $startDate->copy()->addDays($i)->format('Y-m-d');
+            $dayQuery = clone $query;
+            $daySales = $dayQuery->whereDate('created_at', $date)->get();
+            
+            $dailyRevenue = 0;
+            $dailyProfit = 0;
+            
+            foreach ($daySales as $sale) {
+                foreach ($sale->items ?? [] as $item) {
+                    $hargaJual = floatval($item->price ?? 0);
+                    $hargaBeli = floatval($item->inventoryItem->purchase_price ?? 0);
+                    $dailyRevenue += $hargaJual;
+                    $dailyProfit += ($hargaJual - $hargaBeli);
+                }
+                foreach ($sale->accessories ?? [] as $acc) {
+                    $hargaJual = floatval($acc->price ?? 0);
+                    $hargaBeli = floatval($acc->purchaseAccessory->price ?? 0);
+                    $dailyRevenue += $hargaJual;
+                    $dailyProfit += ($hargaJual - $hargaBeli);
+                }
+            }
+            
+            $trendHarian[] = [
+                'tanggal' => Carbon::parse($date)->format('d/m'),
+                'pendapatan' => $dailyRevenue,
+                'laba' => $dailyProfit
+            ];
+        }
+
+        // Ambil data dropdown untuk filter
+        $branches = Branch::all();
+        $brands = Brand::all();
+
+        return view('owner.laporan.index', compact(
+            'rekapCabang',
+            'totalSemua',
+            'chartData',
+            'trendHarian',
+            'tanggalAwal',
+            'tanggalAkhir',
+            'branchId',
+            'brandId',
+            'branches',
+            'brands'
+        ));
+    }
+    public function detailCabang(Request $request)
+    {
+        $branchId = $request->branch_id;
+        $tanggalAwal = $request->tanggal_awal;
+        $tanggalAkhir = $request->tanggal_akhir;
+        
+        $branch = Branch::findOrFail($branchId);
+        
+        $query = Sale::with([
+            'items.product.brand',
+            'items.inventoryItem',
+            'accessories.accessory',
+            'accessories.purchaseAccessory',
+            'customer'
+        ])->where('branch_id', $branchId);
+        
         if ($tanggalAwal && $tanggalAkhir) {
             $query->whereBetween('created_at', [
                 Carbon::parse($tanggalAwal)->startOfDay(),
@@ -351,78 +525,16 @@ class SaleController extends Controller
         } elseif ($tanggalAkhir) {
             $query->where('created_at', '<=', Carbon::parse($tanggalAkhir)->endOfDay());
         }
-    
-        // Filter cabang
-        if ($branchId) {
-            $query->where('branch_id', $branchId);
-        }
-    
-        // Filter customer
-        if ($customerId) {
-            $query->where('customer_id', $customerId);
-        }
-    
-        // Filter brand (cek product brand)
-        if ($brandId) {
-            $query->whereHas('items.product', function ($q) use ($brandId) {
-                $q->where('brand_id', $brandId);
-            });
-        }
-    
-        // Ambil semua sales yang memenuhi filter
-        $penjualan = $query->orderBy('created_at', 'desc')->get();
-    
-        // Hitung total pendapatan & total laba (termasuk accessories)
-        $totalPendapatan = 0;
-        $totalLaba = 0;
-    
-        foreach ($penjualan as $sale) {
-            // Produk HP
-            foreach ($sale->items ?? [] as $item) {
-                $hargaJual = floatval($item->price ?? 0);
-                $hargaBeli = floatval($item->inventoryItem->purchase_price ?? 0);
-                $totalPendapatan += $hargaJual;
-                $totalLaba += ($hargaJual - $hargaBeli);
-            }
-    
-            // Accessories
-            foreach ($sale->accessories ?? [] as $acc) {
-                $hargaJual = floatval($acc->price ?? 0);
-                // try purchaseAccessory relation; jika tidak ada, fallback ke 0
-                $hargaBeli = floatval($acc->purchaseAccessory->price ?? 0);
-                $totalPendapatan += $hargaJual;
-                $totalLaba += ($hargaJual - $hargaBeli);
-            }
-        }
-    
-        // Ambil semua data dropdown untuk filter (branch, customer, brand)
-        $branches = Branch::all();
-        $customers = Customer::all();
-        $brands = Brand::all();
-    
-        // Group sales by customer_id supaya Blade mudah menampilkan per-customer
-        // group key: customer_id (null => 'no_customer' group)
-        $penjualanGrouped = $penjualan->groupBy(function ($sale) {
-            return $sale->customer_id ?? 'no_customer';
-        });
-    
-        // Kirimkan juga selected filter supaya Blade bisa menandai pilihan
-        return view('owner.laporan.index', compact(
-            'penjualan',
-            'penjualanGrouped',
+        
+        $sales = $query->orderBy('created_at', 'desc')->get();
+        
+        return view('owner.laporan.detail-cabang', compact(
+            'sales',
+            'branch',
             'tanggalAwal',
-            'tanggalAkhir',
-            'branchId',
-            'customerId',
-            'brandId',
-            'totalPendapatan',
-            'totalLaba',
-            'branches',
-            'customers',
-            'brands'
+            'tanggalAkhir'
         ));
     }
-
     public function exportPdf(Request $request)
     {
         $tanggalAwal = $request->tanggal_awal;

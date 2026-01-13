@@ -30,7 +30,7 @@
                     <input type="number" name="purchase_price" id="purchase_price" class="form-control" step="0.01" placeholder="Masukkan harga baru" required>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100">Update Semua Produk In Stock</button>
+                <button type="submit" class="btn btn-success w-100">Update</button>
             </form>
         </div>
     </div>

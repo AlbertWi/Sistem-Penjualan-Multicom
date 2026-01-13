@@ -50,7 +50,7 @@ class InventoryItemController extends Controller
                 'purchase_price' => $request->purchase_price
             ]);
     
-        return redirect()->back()->with('success', "Harga modal berhasil diperbarui untuk {$updated} item.");
+        return redirect()->back()->with('success', "Harga modal berhasil diperbarui");
     }
 
 }
