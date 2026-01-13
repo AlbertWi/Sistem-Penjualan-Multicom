@@ -53,7 +53,7 @@ class EcomAuthController extends Controller
 
         Customer::create($data);
 
-        return redirect()->route('ecom.login')->with('success', 'Akun berhasil dibuat');
+        return redirect()->route('login')->with('success', 'Akun berhasil dibuat');
     }
 
     public function logout(Request $request)

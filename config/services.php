@@ -13,6 +13,10 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'rajaongkir' => [
+        'key' => env('RAJAONGKIR_API_KEY'),
+        'url' => env('RAJAONGKIR_BASE_URL'),
+    ],
 
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),

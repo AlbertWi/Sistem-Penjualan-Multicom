@@ -25,6 +25,7 @@ class CatalogController extends Controller
                     ->where('status', 'in_stock');
                 }
             ])
+            ->having('stock_count', '>', 0)
             ->paginate(20);
         return view('catalog.index', compact('products'));
     }

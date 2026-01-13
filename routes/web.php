@@ -143,11 +143,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('branches', BranchController::class);
         Route::resource('users', UserController::class);
         // Sales Settlements
+        Route::post('/sales/{sale}/pelunasan', [SaleController::class, 'pelunasan'])->name('sales.pelunasan');
+        Route::get('/sales/pelunasan', [SaleController::class, 'ownerLunas'])->name('sales.lunas');
         Route::get('/sales', [SaleController::class, 'ownerIndex'])->name('sales.index');
         Route::get('/sales/{id}/edit', [SaleController::class, 'ownerEdit'])->name('sales.edit');
         Route::put('/sales/{id}', [SaleController::class, 'ownerUpdate'])->name('sales.update');
         Route::get('/sales/pelunasan', [SaleController::class, 'ownerLunas'])->name('sales.lunas');
-        Route::post('/sales/{sale}/pelunasan', [SaleController::class, 'pelunasan'])->name('sales.pelunasan');
+        
         
         // Purchase Settlements
         Route::get('/purchases', [PurchaseController::class, 'ownerIndex'])->name('purchases.index');
@@ -208,6 +210,8 @@ Route::middleware('auth:sanctum')->group(function () {
         
         // Product E-commerce
         Route::prefix('product')->name('product_ecom.')->group(function () {
+            Route::post('/ecom/{product}/price', [ManagerProductController::class, 'savePrice'])->name('price');
+            Route::post('/ecom/{product}/toggle', [ManagerProductController::class, 'toggleListing'])->name('toggle');
             Route::get('/for-ecom', [ProductEcomController::class, 'index'])->name('index');
             Route::post('/for-ecom/{product}', [ProductEcomController::class, 'update'])->name('update');
         });

@@ -39,6 +39,9 @@
             </thead>
             <tbody>
             @forelse($products as $product)
+            @php
+                $setting = $product->ecomSetting;
+            @endphp
                 <tr>
                     <td>
                         <strong>{{ $product->brand->name }}</strong><br>
@@ -51,23 +54,20 @@
 
                     <td>
                         <form method="POST"
-                              action="{{ route('manajer_operasional.product_ecom.update', $product) }}"
-                              class="d-flex">
+                            action="{{ route('manajer_operasional.product_ecom.price', $product) }}"
+                            class="d-flex">
                             @csrf
-
                             <input type="number"
-                                   name="ecom_price"
-                                   class="form-control form-control-sm mr-2"
-                                   value="{{ optional($product->ecomSetting)->ecom_price }}"
-                                   required>
-
+                                name="ecom_price"
+                                class="form-control form-control-sm mr-2"
+                                value="{{ $setting->ecom_price ?? '' }}"
+                                required>
                             <button class="btn btn-sm btn-primary">Simpan</button>
                         </form>
                     </td>
-
                     <td class="text-center">
-                        @if(optional($product->ecomSetting)->is_listed)
-                            <span class="badge badge-success    ">Posted</span>
+                        @if($setting && $setting->is_listed)
+                            <span class="badge badge-success">posted</span>
                         @else
                             <span class="badge badge-secondary">Belum</span>
                         @endif
@@ -75,17 +75,10 @@
 
                     <td class="text-center">
                         <form method="POST"
-                            action="{{ route('manajer_operasional.product_ecom.update', $product) }}">
+                            action="{{ route('manajer_operasional.product_ecom.toggle', $product) }}">
                             @csrf
-
-                            <input type="hidden" name="ecom_price"
-                                value="{{ optional($product->ecomSetting)->ecom_price ?? 0 }}">
-
-                            <input type="hidden" name="is_listed"
-                                value="{{ optional($product->ecomSetting)->is_listed ? 0 : 1 }}">
-
-                            <button class="btn btn-sm {{ optional($product->ecomSetting)->is_listed ? 'btn-warning' : 'btn-success' }}">
-                                {{ optional($product->ecomSetting)->is_listed ? 'Unpost' : 'Post' }}
+                            <button class="btn btn-sm {{ $setting && $setting->is_listed ? 'btn-danger' : 'btn-success' }}">
+                                {{ $setting && $setting->is_listed ? 'Unpost' : 'Post' }}
                             </button>
                         </form>
                     </td>

@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\InventoryItem;
 use App\Models\ProductEcomSetting;
 use App\Models\Product;
+use App\Models\Branch;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -47,9 +48,11 @@ class CheckoutController extends Controller
             // Step 1: Validasi dan alokasi stok
             foreach ($cart as $productId => $item) {
                 $ecomSetting = ProductEcomSetting::where('product_id', $productId)
-                ->where('is_listed', true)
-                ->first();
-            
+                    ->where('is_listed', true)
+                    ->whereHas('branch', function ($q) {
+                        $q->where('branch_type', \App\Models\Branch::TYPE_ONLINE);
+                    })
+                    ->first();
                 if (!$ecomSetting) {
                     $product = Product::find($productId);
                     throw new \Exception("Produk {$product->name} tidak tersedia untuk dijual.");
@@ -57,15 +60,17 @@ class CheckoutController extends Controller
                 $availableItems = InventoryItem::with('branch')
                     ->where('product_id', $productId)
                     ->where('status', 'in_stock')
+                    ->whereHas('branch', function ($q) {
+                        $q->where('branch_type', \App\Models\Branch::TYPE_ONLINE);
+                    })
                     ->whereDoesntHave('orderItems', function($query) {
                         $query->whereHas('order', function($q) {
                             $q->whereIn('status', ['pending', 'processing']);
                         });
                     })
-                    ->orderBy('branch_id')
+                    ->orderBy('id') // urut IMEI biar konsisten
                     ->limit($item['qty'] * 2)
                     ->get();
-                
                 if ($availableItems->count() < $item['qty']) {
                     $product = Product::find($productId);
                     throw new \Exception(
@@ -191,32 +196,50 @@ class CheckoutController extends Controller
     {
         $order = Order::where('customer_id', auth()->guard('customer')->id())
             ->findOrFail($id);
-        
-        // Validasi
+
+        // ✅ VALIDASI + ALAMAT
         $request->validate([
-            'payment_method' => 'required|string|in:transfer,cash,qris,ewallet',
-            'payment_notes' => 'nullable|string|max:500',
+            'receiver_name'   => 'required|string|max:100',
+            'receiver_phone'  => 'required|string|max:20',
+            'shipping_address'=> 'required|string|max:500',
+            'province'        => 'required|string|max:100',
+            'city'            => 'required|string|max:100',
+            'district'        => 'required|string|max:100',
+            'postal_code'     => 'required|string|max:10',
+
+            'payment_method'  => 'required|string|in:transfer,cash,qris,ewallet',
+            'payment_notes'   => 'nullable|string|max:500',
         ]);
-        
-        // Update order
+
+        // ✅ UPDATE ORDER + ALAMAT
         $order->update([
-            'payment_status' => 'paid',
-            'payment_method' => $request->payment_method,
-            'payment_notes' => $request->payment_notes,
-            'paid_at' => now(),
+            'receiver_name'    => $request->receiver_name,
+            'receiver_phone'   => $request->receiver_phone,
+            'shipping_address' => $request->shipping_address,
+            'province'         => $request->province,
+            'city'             => $request->city,
+            'district'         => $request->district,
+            'postal_code'      => $request->postal_code,
+
+            'payment_status'   => 'paid',
+            'payment_method'   => $request->payment_method,
+            'payment_notes'    => $request->payment_notes,
+            'paid_at'          => now(),
         ]);
-        
-        // Handle file upload jika ada
+
+        // ✅ UPLOAD BUKTI PEMBAYARAN
         if ($request->hasFile('payment_proof')) {
-            $path = $request->file('payment_proof')->store('payment-proofs', 'public');
+            $path = $request->file('payment_proof')
+                ->store('payment-proofs', 'public');
+
             $order->update(['payment_proof' => $path]);
         }
-        
+
         Log::channel('order')->info('Payment confirmed', [
             'order_id' => $order->id,
             'payment_method' => $request->payment_method
         ]);
-        
+
         return redirect()->route('customer.orders.show', $order->id)
             ->with('success', 'Pembayaran berhasil dikonfirmasi.');
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\ProductEcomSetting;
 use Illuminate\Http\Request;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Auth;
 
 class ProductEcomController extends Controller

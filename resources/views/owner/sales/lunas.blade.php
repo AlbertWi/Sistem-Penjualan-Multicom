@@ -95,7 +95,7 @@
                                     <strong>Rp {{ number_format($sale->total, 0, ',', '.') }}</strong>
                                 </td>
                                 <td class="text-end">
-                                    @if($sale->status == 'blm lunas')
+                                    @if($sale->status == 'belum lunas')
                                         <span class="text-danger fw-bold">Rp {{ number_format($sale->total, 0, ',', '.') }}</span>
                                     @else
                                         <span class="text-muted">Rp 0</span>
@@ -113,13 +113,13 @@
                                     @endif
                                 </td>
                                 <td class="text-center">
-                                    @if($sale->status == 'blm lunas')
-                                        <!-- Tombol Detail -->
-                                        <button type="button" class="btn btn-info btn-sm me-1" data-bs-toggle="modal" data-bs-target="#detailModal{{ $sale->id }}">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </button>
-                                        
-                                        <!-- Tombol Lunasi -->
+                                    <!-- Tombol Detail - Selalu tampil -->
+                                    <button type="button" class="btn btn-info btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#detailModal{{ $sale->id }}">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                    
+                                    @if($sale->status == 'belum lunas')
+                                        <!-- Tombol Lunasi - Hanya untuk belum lunas -->
                                         <form method="POST" action="{{ route('owner.sales.pelunasan', $sale->id) }}" 
                                               onsubmit="return confirm('Yakin ingin melunasi penjualan ini?')" class="d-inline">
                                             @csrf
@@ -128,9 +128,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <button type="button" class="btn btn-info btn-sm me-1" data-bs-toggle="modal" data-bs-target="#detailModal{{ $sale->id }}">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </button>
+                                        <!-- Tombol Disabled - Untuk yang sudah lunas -->
                                         <button class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-lock"></i> Sudah Lunas
                                         </button>

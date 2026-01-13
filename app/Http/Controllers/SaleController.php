@@ -688,64 +688,56 @@ class SaleController extends Controller
 
         return view('owner.sales.index', compact('sales'));
     }
-    public function ownerLunas(Request $request)
-    {
-        $query = Sale::with(['branch', 'customer', 'saleItems.product', 'saleAccessories.accessory']);
-    
-        // Filter cabang
-        if ($request->branch_id) {
-            $query->where('branch_id', $request->branch_id);
+public function ownerLunas(Request $request)
+{
+    $query = Sale::with(['branch', 'customer', 'saleItems.product', 'saleAccessories.accessory']);
+
+    // Filter cabang
+    if ($request->branch_id) {
+        $query->where('branch_id', $request->branch_id);
+    }
+
+    // Filter status
+    if ($request->status_filter) {
+        if ($request->status_filter == 'blm_lunas') {
+            $query->where('status', 'belum lunas');
+        } elseif ($request->status_filter == 'lunas') {
+            $query->where('status', 'lunas');
         }
+    }
+
+    // Urutkan dari terbaru ke terlama
+    $sales = $query->orderBy('created_at', 'desc')->paginate(20);
     
-        // Filter status
-        if ($request->status_filter) {
-            if ($request->status_filter == 'blm_lunas') {
-                $query->where('status', 'blm lunas');
-            } elseif ($request->status_filter == 'lunas') {
-                $query->where('status', 'lunas');
-            }
-        }
+    $branches = Branch::all();
+
+    // ===== PERBAIKAN PERHITUNGAN TOTAL =====
+    // Hitung tanpa filter apapun untuk "Total Seluruh"
+    $totalSeluruh = Sale::sum('total');
     
-        // Urutkan dari terbaru ke terlama
-        $sales = $query->orderBy('created_at', 'desc')->paginate(20);
-        
-        $branches = Branch::all();
+    // Hitung dengan filter yang aktif
+    $queryFiltered = Sale::query();
     
-        // Hitung total untuk summary cards
-        $queryTotal = Sale::query();
-        
-        // Terapkan filter yang sama untuk perhitungan total
-        if ($request->branch_id) {
-            $queryTotal->where('branch_id', $request->branch_id);
-        }
-        if ($request->status_filter) {
-            if ($request->status_filter == 'blm_lunas') {
-                $queryTotal->where('status', 'blm lunas');
-            } elseif ($request->status_filter == 'lunas') {
-                $queryTotal->where('status', 'lunas');
-            }
-        }
-    
-        // Hitung total seluruh penjualan sesuai filter
-        $totalSeluruh = $queryTotal->sum('total');
-        
-        // Hitung total belum lunas
-        $queryBelumLunas = clone $queryTotal;
-        $totalBelumLunas = $queryBelumLunas->where('status', 'blm lunas')->sum('total');
-        
-        // Hitung total lunas
-        $queryLunas = clone $queryTotal;
-        $totalLunas = $queryLunas->where('status', 'lunas')->sum('total');
-    
-        return view('owner.sales.lunas', compact(
-            'sales', 
-            'branches', 
-            'totalSeluruh', 
-            'totalBelumLunas', 
-            'totalLunas'
-        ));
+    if ($request->branch_id) {
+        $queryFiltered->where('branch_id', $request->branch_id);
     }
     
+    // Total Belum Lunas (dengan filter cabang jika ada)
+    $queryBelumLunas = clone $queryFiltered;
+    $totalBelumLunas = $queryBelumLunas->where('status', 'belum lunas')->sum('total');
+    
+    // Total Lunas (dengan filter cabang jika ada)
+    $queryLunas = clone $queryFiltered;
+    $totalLunas = $queryLunas->where('status', 'lunas')->sum('total');
+
+    return view('owner.sales.lunas', compact(
+        'sales', 
+        'branches', 
+        'totalSeluruh', 
+        'totalBelumLunas', 
+        'totalLunas'
+    ));
+}
     public function pelunasan(Sale $sale)
     {
         // Validasi jika sudah lunas
