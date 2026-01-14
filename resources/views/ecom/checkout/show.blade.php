@@ -274,69 +274,6 @@
                 <h5 class="modal-title">Konfirmasi Pembayaran</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <hr>
-                <h6 class="mb-3">Alamat Pengiriman</h6>
-
-                <div class="mb-3">
-                    <label class="form-label">Nama Penerima</label>
-                    <input type="text"
-                        name="receiver_name"
-                        class="form-control"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">No. HP Penerima</label>
-                    <input type="text"
-                        name="receiver_phone"
-                        class="form-control"
-                        required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Alamat Lengkap</label>
-                    <textarea name="shipping_address"
-                            class="form-control"
-                            rows="2"
-                            required></textarea>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Provinsi</label>
-                        <input type="text"
-                            name="province"
-                            class="form-control"
-                            required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Kota / Kabupaten</label>
-                        <input type="text"
-                            name="city"
-                            class="form-control"
-                            required>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Kecamatan</label>
-                        <input type="text"
-                            name="district"
-                            class="form-control"
-                            required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Kode Pos</label>
-                        <input type="text"
-                            name="postal_code"
-                            class="form-control"
-                            required>
-                    </div>
-                </div>
-
             <form action="{{ route('customer.orders.payment', $order->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')

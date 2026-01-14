@@ -72,6 +72,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
         Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
         
+        
         Route::get('/orders', [CheckoutController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [CheckoutController::class, 'show'])->name('orders.show');
         Route::put('/orders/{order}/payment', [CheckoutController::class, 'payment'])->name('orders.payment');

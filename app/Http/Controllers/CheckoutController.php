@@ -197,15 +197,8 @@ class CheckoutController extends Controller
         $order = Order::where('customer_id', auth()->guard('customer')->id())
             ->findOrFail($id);
 
-        // ✅ VALIDASI + ALAMAT
+        // ✅ VALIDASI
         $request->validate([
-            'receiver_name'   => 'required|string|max:100',
-            'receiver_phone'  => 'required|string|max:20',
-            'shipping_address'=> 'required|string|max:500',
-            'province'        => 'required|string|max:100',
-            'city'            => 'required|string|max:100',
-            'district'        => 'required|string|max:100',
-            'postal_code'     => 'required|string|max:10',
 
             'payment_method'  => 'required|string|in:transfer,cash,qris,ewallet',
             'payment_notes'   => 'nullable|string|max:500',
@@ -213,14 +206,6 @@ class CheckoutController extends Controller
 
         // ✅ UPDATE ORDER + ALAMAT
         $order->update([
-            'receiver_name'    => $request->receiver_name,
-            'receiver_phone'   => $request->receiver_phone,
-            'shipping_address' => $request->shipping_address,
-            'province'         => $request->province,
-            'city'             => $request->city,
-            'district'         => $request->district,
-            'postal_code'      => $request->postal_code,
-
             'payment_status'   => 'paid',
             'payment_method'   => $request->payment_method,
             'payment_notes'    => $request->payment_notes,
@@ -241,53 +226,69 @@ class CheckoutController extends Controller
         ]);
 
         return redirect()->route('customer.orders.show', $order->id)
-            ->with('success', 'Pembayaran berhasil dikonfirmasi.');
+            ->with('success', 'Pembayaran berhasil.');
     }
 
-    public function cancel($id)
+    public function cancel(Request $request, $orderId)
     {
-        $order = Order::with('items.inventoryItem')
-            ->where('customer_id', auth()->guard('customer')->id())
-            ->findOrFail($id);
-        
-        // Hanya bisa cancel jika status pending
-        if ($order->status != 'pending') {
-            return redirect()->route('customer.orders.index')
-                ->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses.');
+        $request->validate([
+            'reason' => 'required|string'
+        ]);
+
+        $order = Order::with('items.inventoryItem.product')->findOrFail($orderId);
+
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return back()->with('error', 'Order tidak dapat dibatalkan.');
         }
-        
+
         DB::beginTransaction();
         try {
-            // Return inventory ke stock
+
             foreach ($order->items as $item) {
-                if ($item->inventoryItem) {
+
+                // 1️⃣ Kembalikan stok (INVENTORY)
+                if (
+                    $item->inventoryItem &&
+                    $item->inventoryItem->status === 'reserved'
+                ) {
                     $item->inventoryItem->update([
-                        'status' => 'in_stock',
-                        'reserved_at' => null
+                        'status' => 'in_stock'
+                    ]);
+                }
+
+                // 2️⃣ Aktifkan kembali listing e-commerce (PRODUCT_ECOM_SETTINGS)
+                if ($item->product && $item->product->ecomSetting) {
+                    $item->product->ecomSetting->update([
+                        'is_listed' => true,
+                        'listed_at' => now()
                     ]);
                 }
             }
-            
+
+            // 3️⃣ Update order
             $order->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-                'cancellation_reason' => 'Dibatalkan oleh customer',
+                'status'               => 'cancelled',
+                'cancelled_at'         => now(),
+                'cancelled_by'         => auth()->id(),
+                'cancellation_reason'  => $request->reason,
             ]);
-            
+
             DB::commit();
-            
-            Log::channel('order')->info('Order cancelled by customer', [
-                'order_id' => $order->id,
-                'customer_id' => $order->customer_id
-            ]);
-            
-            return redirect()->route('customer.orders.index')
-                ->with('success', 'Pesanan berhasil dibatalkan. Stok telah dikembalikan.');
-                
-        } catch (\Exception $e) {
+
+            return back()->with('success', 'Order berhasil dibatalkan & stok dikembalikan.');
+
+        } catch (\Throwable $e) {
+
             DB::rollBack();
-            return redirect()->route('customer.orders.index')
-                ->with('error', 'Gagal membatalkan pesanan.');
+
+            Log::error('Order cancellation failed', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Gagal membatalkan order. Cek log.');
         }
     }
+
+    
 }

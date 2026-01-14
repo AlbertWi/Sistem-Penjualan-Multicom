@@ -18,8 +18,7 @@ class InventoryItem extends Model
         'purchase_price',
         'inventory_id',
         'ecom_price', 
-        'is_listed', 
-        'listed_at',];
+        ];
 
     public function branch() {
         return $this->belongsTo(Branch::class);
