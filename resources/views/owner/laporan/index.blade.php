@@ -4,31 +4,6 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- HEADER -->
-    <div class="row align-items-center mb-4">
-        <div class="col">
-            <h4 class="fw-bold text-primary mb-1">
-                <i class="fas fa-chart-bar me-2"></i>Rekap Penjualan Per Cabang
-            </h4>
-            <p class="text-muted mb-0">
-                <i class="fas fa-calendar-alt me-1"></i>
-                Periode: {{ \Carbon\Carbon::parse($tanggalAwal)->format('d/m/Y') }} - 
-                {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d/m/Y') }}
-            </p>
-        </div>
-        <div class="col-auto">
-            @if(!empty($rekapCabang))
-            <form method="GET" action="{{ route('owner.sales.export-pdf') }}" class="d-inline">
-                <input type="hidden" name="tanggal_awal" value="{{ $tanggalAwal }}">
-                <input type="hidden" name="tanggal_akhir" value="{{ $tanggalAkhir }}">
-                <input type="hidden" name="branch_id" value="{{ $branchId ?? '' }}">
-                <button type="submit" class="btn btn-danger shadow-sm">
-                    <i class="fas fa-file-pdf me-2"></i> Export PDF
-                </button>
-            </form>
-            @endif
-        </div>
-    </div>
 
     <!-- FILTER SECTION -->
     <div class="card shadow-sm mb-4">
@@ -104,7 +79,31 @@
             </form>
         </div>
     </div>
-
+<!-- HEADER -->
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h4 class="fw-bold text-primary mb-1">
+                <i class="fas fa-chart-bar me-2"></i>Rekap Penjualan Per Cabang
+            </h4>
+            <p class="text-muted mb-0">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Periode: {{ \Carbon\Carbon::parse($tanggalAwal)->format('d/m/Y') }} - 
+                {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d/m/Y') }}
+            </p>
+        </div>
+        <div class="col-auto">
+            @if(!empty($rekapCabang))
+            <form method="GET" action="{{ route('owner.sales.export-pdf') }}" class="d-inline">
+                <input type="hidden" name="tanggal_awal" value="{{ $tanggalAwal }}">
+                <input type="hidden" name="tanggal_akhir" value="{{ $tanggalAkhir }}">
+                <input type="hidden" name="branch_id" value="{{ $branchId ?? '' }}">
+                <button type="submit" class="btn btn-danger shadow-sm">
+                    <i class="fas fa-file-pdf me-2"></i> Export PDF
+                </button>
+            </form>
+            @endif
+        </div>
+    </div>
     @if(!empty($rekapCabang))
         <!-- SUMMARY CARDS -->
         <div class="row mb-4">

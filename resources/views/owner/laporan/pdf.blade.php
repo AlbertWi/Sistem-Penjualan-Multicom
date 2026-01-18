@@ -132,7 +132,7 @@
             </tr>
             <tr>
                 <td>Total Transaksi</td>
-                <td>: {{ $penjualan->sum(fn($sale) => $sale->items->count()) }} item</td>
+                <td>: {{ $totalItem ?? 0 }} item</td>
             </tr>
         </table>
     </div>
@@ -167,26 +167,53 @@
         </thead>
         <tbody>
             @php $no = 1; @endphp
+
             @foreach ($penjualan as $sale)
-                @foreach ($sale->items as $item)
+
+                {{-- HP Items --}}
+                @foreach ($sale->items ?? [] as $item)
                     @php
-                        $hargaJual = $item->price;
-                        $hargaBeli = $item->inventoryItem->purchaseItem->price ?? 0;
+                        $hargaJual = floatval($item->price ?? 0);
+                        $hargaBeli = floatval($item->inventoryItem->purchaseItem->price ?? 0);
                         $laba = $hargaJual - $hargaBeli;
+                        $namaProduk = $item->product->name ?? '-';
+                        $imei = $item->imei ?? '-';
                     @endphp
                     <tr class="page-break">
                         <td class="text-center">{{ $no++ }}</td>
                         <td class="text-center">{{ $sale->created_at->format('d/m/Y') }}</td>
                         <td>{{ $sale->branch->name ?? '-' }}</td>
-                        <td>{{ $item->product->name ?? '-' }}</td>
-                        <td>{{ $item->imei }}</td>
+                        <td>{{ $namaProduk }}</td>
+                        <td>{{ $imei }}</td>
                         <td class="text-right">Rp {{ number_format($hargaBeli, 0, ',', '.') }}</td>
                         <td class="text-right">Rp {{ number_format($hargaJual, 0, ',', '.') }}</td>
                         <td class="text-right">Rp {{ number_format($laba, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
+
+                {{-- Accessories --}}
+                @foreach ($sale->accessories ?? [] as $acc)
+                    @php
+                        $hargaJual = floatval($acc->price ?? 0);
+                        $hargaBeli = floatval($acc->purchaseAccessory->price ?? 0);
+                        $laba = $hargaJual - $hargaBeli;
+                        $namaProduk = $acc->accessory->name ?? '-';
+                    @endphp
+                    <tr class="page-break">
+                        <td class="text-center">{{ $no++ }}</td>
+                        <td class="text-center">{{ $sale->created_at->format('d/m/Y') }}</td>
+                        <td>{{ $sale->branch->name ?? '-' }}</td>
+                        <td>{{ $namaProduk }}</td>
+                        <td class="text-center">-</td> {{-- aksesori tidak punya IMEI --}}
+                        <td class="text-right">Rp {{ number_format($hargaBeli, 0, ',', '.') }}</td>
+                        <td class="text-right">Rp {{ number_format($hargaJual, 0, ',', '.') }}</td>
+                        <td class="text-right">Rp {{ number_format($laba, 0, ',', '.') }}</td>
+                    </tr>
+                @endforeach
+
             @endforeach
         </tbody>
+
         <tfoot>
             <tr class="total-row">
                 <td colspan="6" class="text-center"><strong>TOTAL</strong></td>

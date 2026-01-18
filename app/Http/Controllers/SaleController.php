@@ -540,10 +540,17 @@ class SaleController extends Controller
         $tanggalAwal = $request->tanggal_awal;
         $tanggalAkhir = $request->tanggal_akhir;
         $branchId = $request->branch_id;
+        $brandId = $request->brand_id;
 
-        $query = Sale::with(['items.product', 'branch', 'items.inventoryItem.purchaseItem']);
+        $query = Sale::with([
+            'branch',
+            'items.product.brand',
+            'items.inventoryItem.purchaseItem',
+            'accessories.accessory',
+            'accessories.purchaseAccessory',
+        ]);
 
-        // Filter berdasarkan tanggal
+        // Filter tanggal
         if ($tanggalAwal && $tanggalAkhir) {
             $query->whereBetween('created_at', [
                 Carbon::parse($tanggalAwal)->startOfDay(),
@@ -551,23 +558,42 @@ class SaleController extends Controller
             ]);
         }
 
-        // Filter berdasarkan cabang
+        // Filter cabang
         if ($branchId) {
             $query->where('branch_id', $branchId);
         }
 
-        $penjualan = $query->get();
+        // Filter brand (khusus HP items)
+        if ($brandId) {
+            $query->whereHas('items.product', function ($q) use ($brandId) {
+                $q->where('brand_id', $brandId);
+            });
+        }
 
-        // Hitung total dan laba
+        $penjualan = $query->orderBy('created_at', 'desc')->get();
+
+        // Hitung total pendapatan & laba (HP + aksesori)
         $totalPendapatan = 0;
         $totalLaba = 0;
+        $totalItem = 0;
 
         foreach ($penjualan as $sale) {
-            foreach ($sale->items as $item) {
-                $hargaJual = $item->price;
-                $hargaBeli = $item->inventoryItem->purchaseItem->price ?? 0;
+            // HP
+            foreach ($sale->items ?? [] as $item) {
+                $hargaJual = floatval($item->price ?? 0);
+                $hargaBeli = floatval($item->inventoryItem->purchaseItem->price ?? 0);
                 $totalPendapatan += $hargaJual;
                 $totalLaba += ($hargaJual - $hargaBeli);
+                $totalItem++;
+            }
+
+            // Accessories
+            foreach ($sale->accessories ?? [] as $acc) {
+                $hargaJual = floatval($acc->price ?? 0);
+                $hargaBeli = floatval($acc->purchaseAccessory->price ?? 0);
+                $totalPendapatan += $hargaJual;
+                $totalLaba += ($hargaJual - $hargaBeli);
+                $totalItem++;
             }
         }
 
@@ -577,15 +603,18 @@ class SaleController extends Controller
             'tanggalAkhir' => $tanggalAkhir,
             'totalPendapatan' => $totalPendapatan,
             'totalLaba' => $totalLaba,
+            'totalItem' => $totalItem, // ✅ buat dipakai di view
             'namaPerusahaan' => 'Multicom Group',
         ];
 
         $pdf = Pdf::loadView('owner.laporan.pdf', $data);
-        
-        $filename = 'laporan-penjualan-' . ($tanggalAwal ? $tanggalAwal : 'semua') . '-sampai-' . ($tanggalAkhir ? $tanggalAkhir : 'sekarang') . '.pdf';
-        
+
+        $filename = 'laporan-penjualan-' . ($tanggalAwal ? $tanggalAwal : 'semua') .
+                    '-sampai-' . ($tanggalAkhir ? $tanggalAkhir : 'sekarang') . '.pdf';
+
         return $pdf->download($filename);
     }
+
     public function searchNota(Request $request)
     {
         $q = $request->input('q');

@@ -27,7 +27,7 @@
                         <a href="#" class="nav-link {{ request()->is('manajer_operasional/brands*', 'manajer_operasional/types*', 'manajer_operasional/products*', 'manajer_operasional/accessories*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-database"></i>
                             <p>
-                                Data Master
+                                Master
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
